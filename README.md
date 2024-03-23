@@ -6,4 +6,6 @@ Some projects I'm using to learn AI since my MS
 
 * [ ] Proximal Policy Optimization (PPO)
 * [ ] Graph Neural Networks (GNN)
-* [ ] Transformers
+* [ ] Transformers / LLMS
+* [ ] RLHF
+* [ ] Stable Diffusion
