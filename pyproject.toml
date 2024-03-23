@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "continuing-education"
+version = "0.1.0"
+description = ""
+authors = ["Ryan Peach <rgpeach10@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "continuing_education"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+gymnasium = "^0.29.1"
+polars = "^0.20.16"
+numpy = "^1.26.4"
+pydantic = "^2.6.4"
+torch = "^2.2.1"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.3.4"
+pytest = "^8.1.1"
+mypy = "^1.9.0"
+jupyter = "^1.0.0"
+jupytext = "^1.16.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+extend-include = ["*.ipynb"]
