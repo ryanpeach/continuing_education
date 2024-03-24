@@ -9,3 +9,15 @@ Some projects I'm using to learn AI since my MS
 * [ ] Transformers / LLMS
 * [ ] RLHF
 * [ ] Stable Diffusion
+
+# Installation
+
+`poetry install`
+
+## MacOSX
+
+`brew install sdl sdl_ttf sdl_image sdl_mixer portmidi`
+
+## Ubuntu
+
+`sudo apt-get install libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libfreetype6-dev libportmidi-dev libjpeg-dev python3-setuptools python3-dev python3-numpy`

@@ -14,12 +14,9 @@
 # ---
 
 # %% [markdown]
-# # Proximal Policy Optimization (PPO)
+# # Reinforce
 #
-# Paper: https://arxiv.org/abs/1707.06347
-#
-# Other Useful Resources:
-# - https://www.youtube.com/watch?v=HrapVFNBN64
+# Tutorial: https://huggingface.co/learn/deep-rl-course/unit4/introduction
 
 # %%
 import torch
