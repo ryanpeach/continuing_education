@@ -9,23 +9,49 @@ jobs:
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v4
+
         - name: Install Python
           uses: actions/setup-python@v4
-          # see details (matrix, python-version, python-version-file, etc.)
-          # https://github.com/actions/setup-python
+          with:
+            python-version: '3.10'
+
         - name: Install poetry
           uses: abatilo/actions-poetry@v2
+
         - name: Setup a local virtual environment (if no poetry.toml file)
           run: |
             poetry config virtualenvs.create true --local
             poetry config virtualenvs.in-project true --local
+
         - uses: actions/cache@v3
           name: Define a cache for the virtual environment based on the dependencies lock file
           with:
             path: ./.venv
             key: venv-${{ hashFiles('poetry.lock') }}
+
         - name: Install the project dependencies
           run: poetry install
+
         - uses: chartboost/ruff-action@v1
+
         - name: Mypy
           run: poetry run mypy .
+
+        - name: Synchronize Notebooks
+          run: jupytext --sync *.ipynb
+
+        - name: Check for changes
+          id: git-check
+          run: |
+            if git diff --exit-code; then
+              echo "No changes detected."
+            else
+              echo "Changes detected!"
+              echo "::set-output name=changes_detected::true"
+              git diff
+            fi
+
+        - name: Fail if changes are detected
+          if: steps.git-check.outputs.changes_detected == 'true'
+          run: exit 1
+          shell: bash
