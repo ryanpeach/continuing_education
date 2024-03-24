@@ -38,7 +38,7 @@ jobs:
           run: poetry run mypy .
 
         - name: Synchronize Notebooks
-          run: jupytext --sync *.ipynb
+          run: poetry run jupytext --sync **/*.ipynb
 
         - name: Check for changes
           id: git-check
