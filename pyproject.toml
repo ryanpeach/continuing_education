@@ -5,7 +5,7 @@ description = ""
 authors = ["Ryan Peach <rgpeach10@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [{include = "continuing_education"}]
+packages = []
 
 [tool.poetry.dependencies]
 python = "^3.10"
