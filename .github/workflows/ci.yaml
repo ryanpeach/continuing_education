@@ -37,6 +37,9 @@ jobs:
         - name: Mypy
           run: poetry run mypy .
 
+        - name: Pytest
+          run: poetry run pytest .
+
         - name: Synchronize Notebooks
           run: poetry run jupytext --sync **/*.ipynb
 
