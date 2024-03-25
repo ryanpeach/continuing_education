@@ -24,6 +24,12 @@ import torch
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 device
 
+# %%
+import pytest
+import ipytest
+
+ipytest.autoconfig()
+
 # %% [markdown]
 # # Environment
 #
@@ -156,10 +162,8 @@ def collect_episode(policy: Policy) -> Tuple[Trajectory, Reward]:
 # %% [markdown]
 # This represents the formula $R(\tau)$ in the tutorial. It's a simple reward decay formula.
 
+
 # %%
-import pytest
-
-
 def cumulative_return(trajectory: RewardTrajectory, gamma: float = 0.5) -> float:
     if len(trajectory) == 0:
         raise ValueError("Trajectory needs at least one item.")
@@ -181,3 +185,10 @@ def cumulative_return(trajectory: RewardTrajectory, gamma: float = 0.5) -> float
 )
 def test_cumulative_return(test_input: RewardTrajectory, expected: float) -> None:
     assert cumulative_return(test_input, gamma=0.5) == expected
+
+
+# %% [markdown]
+# # Run Tests
+
+# %%
+ipytest.run("-vv")
