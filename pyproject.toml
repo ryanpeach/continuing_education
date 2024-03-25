@@ -15,11 +15,11 @@ pydantic = "^2.6.4"
 torch = "^2.2.1"
 pillow = "^10.2.0"
 pygame = "^2.5.2"
-ple = {git = "git@github.com:ntasfi/PyGame-Learning-Environment.git"}
 gym-games = "^1.0.3"
 MinAtar = "^1.0.15"
 huggingface-hub = "^0.21.4"
 ipytest = "^0.14.0"
+ple = {path = "submodules/PyGame-Learning-Environment"}
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.3.4"

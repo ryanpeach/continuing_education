@@ -1579,10 +1579,8 @@ numpy = "*"
 Pillow = "*"
 
 [package.source]
-type = "git"
-url = "git@github.com:ntasfi/PyGame-Learning-Environment.git"
-reference = "HEAD"
-resolved_reference = "3dbe79dc0c35559bb441b9359948aabf9bb3d331"
+type = "directory"
+url = "submodules/PyGame-Learning-Environment"
 
 [[package]]
 name = "pluggy"
@@ -2274,7 +2272,7 @@ python-versions = ">=3.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "4411d20984b793fb315133ffbe8b0be1f9200bce0ad7e48e1326047de7ad27a5"
+content-hash = "dda6633155a123323a9a15fe09b1596708a30ff94597ad37ec1459abb1b8a25f"
 
 [metadata.files]
 annotated-types = [
