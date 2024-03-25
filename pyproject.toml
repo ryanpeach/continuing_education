@@ -34,3 +34,12 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
 extend-include = ["*.ipynb"]
+
+[tool.ruff.lint]
+extend-ignore = ["E402"]
+
+[tool.pytest.ini_options]
+python_files = "*.py"
+
+[tool.mypy]
+plugins = "numpy.typing.mypy_plugin"
