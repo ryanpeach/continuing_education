@@ -14,6 +14,8 @@ polars = "^0.20.16"
 numpy = "^1.26.4"
 pydantic = "^2.6.4"
 torch = "^2.2.1"
+networkx = "^3.2.1"
+sympy = "^1.12"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.3.4"
