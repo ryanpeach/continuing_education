@@ -1,6 +1,6 @@
 # Add a new notebook to the project
 add path:
-  poetry run --set-formats ipynb,py:percent {{path}}
+  poetry run jupytext --set-formats ipynb,py:percent {{path}}
 
 # Sync all notebooks
 sync:
