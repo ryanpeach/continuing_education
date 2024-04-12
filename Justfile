@@ -6,10 +6,6 @@ add path:
 sync:
   poetry run jupytext --sync **/*.ipynb
 
-# Run the tests
-test: sync
-  poetry run pytest continuing_education
-
 # Run the linters
 check: sync
   poetry run ruff check

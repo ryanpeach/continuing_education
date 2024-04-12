@@ -16,9 +16,6 @@
 # %%
 # %load_ext autoreload
 # %autoreload 2
-import ipytest
-
-ipytest.autoconfig()
 
 # %% [markdown]
 # # Reinforce
@@ -205,9 +202,7 @@ def cumulative_discounted_reward(
 
 
 # %%
-# %%ipytest
 import pytest
-
 
 # Its important to test equations like this!
 @pytest.mark.parametrize(
