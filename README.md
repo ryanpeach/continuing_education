@@ -18,6 +18,12 @@ Some projects I'm using to learn AI since my MS
 
 # Installation
 
+Make sure you have cloned the submodules first:
+
+`git submodule update --init --recursive`
+
+Then install the dependencies:
+
 `poetry install`
 
 ## MacOSX
