@@ -44,3 +44,11 @@ extend-ignore = ["E402"]
 
 [tool.mypy]
 plugins = "numpy.typing.mypy_plugin"
+
+[[tool.mypy.overrides]]
+module = "plotly.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "ipytest.*"
+ignore_missing_imports = true
