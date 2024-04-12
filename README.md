@@ -2,6 +2,8 @@
 
 Some projects I'm using to learn AI since my MS
 
+Foo
+
 # TODO
 
 * [ ] Proximal Policy Optimization (PPO)
