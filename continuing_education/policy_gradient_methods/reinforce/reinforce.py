@@ -13,6 +13,13 @@
 #     name: python3
 # ---
 
+# %%
+# %load_ext autoreload
+# %autoreload 2
+import ipytest
+
+ipytest.autoconfig()
+
 # %% [markdown]
 # # Reinforce
 #
@@ -132,11 +139,13 @@ class Policy(nn.Module):
 #
 # 1. Start with policy model $\pi_{\theta}$
 # 2. repeat:
-#     1. Generate an episode $S_0, A_0, r_1, ..., S_{T-1}, A_{T-1}, r_{T-1}$ following $\pi_{\theta}$
+#     1. Generate an episode $S_0, A_0, r_0, ..., S_{T-1}, A_{T-1}, r_{T-1}$ following $\pi_{\theta}$
 #     2. for t from T-1 to 0:
 #         1. $G_t = \sum_{k=t}^{T-1} \gamma^{k-t} r_k$
 #     3. $L(\theta) = \frac{1}{T} \sum_{t=0}^{T-1} G_t \log \pi_{\theta}(a_t | s_t)$
 #     4. Optimize $\pi_{\theta}$ using $\nabla_{\theta} L(\theta)$
+#
+# First lets create some helper functions and types to use in the training loop.
 
 # %%
 from dataclasses import dataclass
@@ -159,7 +168,7 @@ RewardTrajectory = NewType("RewardTrajectory", List[Reward])
 
 # %%
 def collect_episode(policy: Policy) -> Tuple[Trajectory, Reward]:
-    """Returns the trajectory and the sum of all rewards."""
+    """2.1. Returns the trajectory and the sum of all rewards."""
     state, _ = env.reset()
     done = False
     trajectory = []
@@ -177,47 +186,34 @@ def collect_episode(policy: Policy) -> Tuple[Trajectory, Reward]:
     return Trajectory(trajectory), Reward(sum(sar.reward for sar in trajectory))
 
 
-# %% [markdown]
-# This represents the formula $R(\tau)$ in the tutorial. It's a simple reward decay formula.
-
-
 # %%
-import pytest
-
-
 def cumulative_discounted_reward(
     trajectory: RewardTrajectory, gamma: float = 0.5
-) -> Reward:
+) -> RewardTrajectory:
+    """2.2.1 Returns the cumulative discounted rewards of a trajectory for each timestep."""
     if len(trajectory) == 0:
         raise ValueError("Trajectory needs at least one item.")
     if len(trajectory) == 1:
-        return 0.0
-    out = trajectory[1]
-    if len(trajectory) == 2:
-        return out
-    for i in range(2, len(trajectory)):
-        out += gamma * trajectory[i]
-        gamma *= gamma
-    return out
+        return RewardTrajectory([trajectory[0]])
+    discounted_rewards: List[Reward] = []
+    cumulative_reward: Reward = 0
+    for reward in reversed(trajectory):
+        cumulative_reward = reward + gamma * cumulative_reward
+        discounted_rewards.append(cumulative_reward)
+    return RewardTrajectory(discounted_rewards[::-1])
+
+
+# %%
+# %%ipytest
+import pytest
 
 
 # Its important to test equations like this!
 @pytest.mark.parametrize(
     "test_input,expected",
-    [([0], 0), ([1, 1], 1), ([1, 1, 1], 1.5), ([1, 1, 1, 1], 1.75)],
+    [([0], [0]), ([1, 1], [1.5, 1]), ([1, 1, 1], [1.75, 1.5, 1])],
 )
 def test_cumulative_discounted_reward(
-    test_input: RewardTrajectory, expected: float
+    test_input: RewardTrajectory, expected: RewardTrajectory
 ) -> None:
     assert cumulative_discounted_reward(test_input, gamma=0.5) == expected
-
-
-# %% [markdown]
-# # Run Tests
-
-# %%
-import ipytest
-
-ipytest.autoconfig()
-
-ipytest.run("-vv")
