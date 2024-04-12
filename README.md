@@ -18,7 +18,9 @@ Some projects I'm using to learn AI since my MS
 
 # Installation
 
-Make sure you have cloned the submodules first:
+First follow specific instructions for your operating system listed in subheaders below.
+
+Then make sure you have cloned the submodules:
 
 `git submodule update --init --recursive`
 
