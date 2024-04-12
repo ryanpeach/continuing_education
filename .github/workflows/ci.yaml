@@ -37,14 +37,11 @@ jobs:
         - name: Install the project dependencies
           run: poetry install
 
-        - name: Check
-          run: just check
-
-        - name: Test
-          run: just test
-
         - name: Synchronize Notebooks
           run: just sync
+
+        - name: Check
+          run: just check
 
         - name: Check for changes
           id: git-check
