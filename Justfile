@@ -8,7 +8,7 @@ sync:
 
 # Run the tests
 test: sync
-  poetry run pytest .
+  poetry run pytest continuing_education
 
 # Run the linters
 check: sync
