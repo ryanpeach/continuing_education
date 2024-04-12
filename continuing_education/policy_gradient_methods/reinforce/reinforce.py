@@ -69,12 +69,14 @@ print(f"Action return: {action_return}")
 from typing import NewType
 import numpy.typing as npt
 import numpy as np
+from torch import Tensor
 
 # Lets make some types to make type annotation easier
 State = NewType("State", npt.NDArray[np.float64])
 Action = NewType("Action", int)
 Reward = NewType("Reward", float)
-LogProb = NewType("LogProb", float)
+LogProb = NewType("LogProb", Tensor)
+LogLikelihood = NewType("LogLikelihood", Tensor)
 
 # %%
 from typing import List, Tuple
@@ -107,7 +109,7 @@ class Policy(nn.Module):
         """Takes a state tensor and returns a probability distribution along the action space"""
         return self.network(state)
 
-    def act(self, state: State) -> Tuple[Action, float]:
+    def act(self, state: State) -> Tuple[Action, LogProb]:
         """Same as forward, instead of returning the entire distribution, we
         return the maximum probability action
         along with the log probability of that action
@@ -122,8 +124,13 @@ class Policy(nn.Module):
         # Now we want to get the action that corresponds to the highest probability
         action_idx = np.argmax(pdf)
 
+        # However, we are going to do backprop through the log probability of the action
+        # Therefore this needs to stay as a tensor
+        # The Category distribution in torch has a method for a backprop friendly log probability of one action from a multinomial distribution
+        log_prob = torch.distributions.Categorical(pdf).log_prob(action_idx)
+
         # We return the action and the log probability of the action
-        return Action(action_idx.item()), float(np.log(pdf[action_idx]))
+        return Action(action_idx.item()), log_prob
 
 
 # %% [markdown]
@@ -165,7 +172,7 @@ RewardTrajectory = NewType("RewardTrajectory", List[Reward])
 
 
 # %%
-def collect_episode(policy: Policy) -> Tuple[Trajectory, Reward]:
+def collect_episode(policy: Policy) -> Trajectory:
     """2.1. Returns the trajectory and the sum of all rewards."""
     state, _ = env.reset()
     done = False
@@ -181,11 +188,11 @@ def collect_episode(policy: Policy) -> Tuple[Trajectory, Reward]:
                 log_prob=LogProb(log_prob),
             )
         )
-    return Trajectory(trajectory), Reward(sum(sar.reward for sar in trajectory))
+    return Trajectory(trajectory)
 
 
 # %%
-def cumulative_discounted_reward(
+def cumulative_discounted_rewards(
     trajectory: RewardTrajectory, gamma: float = 0.5
 ) -> RewardTrajectory:
     """2.2.1 Returns the cumulative discounted rewards of a trajectory for each timestep."""
@@ -202,14 +209,78 @@ def cumulative_discounted_reward(
 
 
 # %%
-import pytest
+# It's important to test our code, so we know it works as expected
+# We tried to use ipytest but it wasn't working https://github.com/chmp/ipytest
+assert cumulative_discounted_rewards(
+    RewardTrajectory([0]), gamma=0.5
+) == RewardTrajectory([0])
+assert cumulative_discounted_rewards(
+    RewardTrajectory([1]), gamma=0.5
+) == RewardTrajectory([1])
+assert cumulative_discounted_rewards(
+    RewardTrajectory([1, 1]), gamma=0.5
+) == RewardTrajectory([1.5, 1])
+assert cumulative_discounted_rewards(
+    RewardTrajectory([1, 1, 1]), gamma=0.5
+) == RewardTrajectory([1.75, 1.5, 1])
 
-# Its important to test equations like this!
-@pytest.mark.parametrize(
-    "test_input,expected",
-    [([0], [0]), ([1, 1], [1.5, 1]), ([1, 1, 1], [1.75, 1.5, 1])],
-)
-def test_cumulative_discounted_reward(
-    test_input: RewardTrajectory, expected: RewardTrajectory
-) -> None:
-    assert cumulative_discounted_reward(test_input, gamma=0.5) == expected
+
+# %%
+def normalize(returns: Tensor) -> Tensor:
+    ## standardization of the returns is employed to make training more stable
+    eps = np.finfo(np.float32).eps.item()
+
+    ## eps is the smallest representable float, which is
+    # added to the standard deviation of the returns to avoid numerical instabilities
+    returns = torch.tensor(returns)
+    returns = (returns - returns.mean()) / (returns.std() + eps)
+    return returns
+
+
+# %%
+def log_likelihood(policy: Policy, trajectory: Trajectory) -> LogLikelihood:
+    """
+    2.2.2 Returns the likelihood of a trajectory given a policy.
+    Instead of doing 1/T, we normalize the cumulative discounted rewards as it says
+    to do in the tutorial.
+    Also we use torch.cat and sum for backprop reasons
+    """
+    log_likelihoods = []
+    cum_disc_rewards = normalize(
+        cumulative_discounted_rewards(
+            RewardTrajectory([sar.reward for sar in trajectory])
+        )
+    )
+    for cum_disc_reward, sar in zip(cum_disc_rewards, trajectory):
+        _, log_prob = policy.act(sar.state)
+        log_likelihoods.append(cum_disc_reward * -log_prob)
+    return LogLikelihood(torch.cat(log_likelihoods).sum())
+
+
+# %%
+import torch.optim as optim
+
+cartpole_hyperparameters = {
+    "h_size": 16,
+    "n_training_episodes": 1000,
+    "n_evaluation_episodes": 10,
+    "max_t": 1000,
+    "gamma": 1.0,
+    "lr": 1e-2,
+    "state_space": observation_space_shape,
+    "action_space": action_space_size,
+}
+policy = Policy(
+    cartpole_hyperparameters["state_space"],
+    cartpole_hyperparameters["action_space"],
+    [cartpole_hyperparameters["h_size"]],
+).to(device)
+optimizer = optim.Adam(policy.parameters(), lr=cartpole_hyperparameters["lr"])
+
+# %%
+for i in range(cartpole_hyperparameters["n_training_episodes"]):
+    trajectory = collect_episode(policy)
+    policy_loss = log_likelihood(policy, trajectory)
+    optimizer.zero_grad()
+    policy_loss.backward()
+    optimizer.step()
