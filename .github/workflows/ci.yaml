@@ -17,6 +17,9 @@ jobs:
           with:
             python-version: '3.10'
 
+        - name: Install Just
+          uses: extractions/setup-just@v2
+
         - name: Install poetry
           uses: abatilo/actions-poetry@v2
 
@@ -34,16 +37,14 @@ jobs:
         - name: Install the project dependencies
           run: poetry install
 
-        - uses: chartboost/ruff-action@v1
+        - name: Check
+          run: just check
 
-        - name: Mypy
-          run: poetry run mypy .
-
-        - name: Pytest
-          run: poetry run pytest .
+        - name: Test
+          run: just test
 
         - name: Synchronize Notebooks
-          run: poetry run jupytext --sync **/*.ipynb
+          run: just sync
 
         - name: Check for changes
           id: git-check
