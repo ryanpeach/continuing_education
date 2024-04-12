@@ -1,6 +1,7 @@
 # ---
 # jupyter:
 #   jupytext:
+#     formats: ipynb,py:percent
 #     text_representation:
 #       extension: .py
 #       format_name: percent
@@ -47,7 +48,8 @@ fig.show()
 # * They turn exponentiation into multiplication: $\log(a^b) = b \cdot \log(a)$
 
 # %%
-from sympy import symbols, log, Eq, simplify
+from sympy import symbols, log, Eq
+from sympy.simplify import simplify
 
 # Define the symbols
 a, b = symbols("a b", positive=True, real=True)
