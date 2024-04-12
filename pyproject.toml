@@ -37,6 +37,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
 extend-include = ["*.ipynb"]
+exclude = ["./submodules"]
 
 [tool.ruff.lint]
 extend-ignore = ["E402"]
