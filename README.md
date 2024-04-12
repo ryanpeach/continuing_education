@@ -7,8 +7,14 @@ Some projects I'm using to learn AI since my MS
 * [ ] Proximal Policy Optimization (PPO)
 * [ ] Graph Neural Networks (GNN)
 * [ ] Transformers / LLMS
+* [ ] Model Based Reinforcement Learning
+* [ ] Exploration in RL
 * [ ] RLHF
 * [ ] Stable Diffusion
+
+## Sources for further work
+
+* [Key Papers in Deep RL](https://spinningup.openai.com/en/latest/spinningup/keypapers.html)
 
 # Installation
 

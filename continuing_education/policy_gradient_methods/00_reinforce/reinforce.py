@@ -24,12 +24,6 @@ import torch
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 device
 
-# %%
-import pytest
-import ipytest
-
-ipytest.autoconfig()
-
 # %% [markdown]
 # # Environment
 #
@@ -80,13 +74,20 @@ Reward = NewType("Reward", float)
 # %%
 from typing import List, Tuple
 from torch import nn
-from torch.distributions import Categorical
 
 
 class Policy(nn.Module):
+    """A classic policy network is one which takes in a state
+    and returns a probability distribution over the action space"""
+
     def __init__(
         self, state_size: int, action_size: int, hidden_sizes: List[int]
     ) -> None:
+        """
+        This is a very simple feed forward network
+        with an input of size state_size, and output of size action_size
+        and ReLU activations between the layers
+        """
         super().__init__()
         assert len(hidden_sizes) > 0, "Need at least one hidden layer"
         network = [nn.Linear(state_size, hidden_sizes[0]), nn.ReLU()]
@@ -98,35 +99,50 @@ class Policy(nn.Module):
         self.network = nn.Sequential(*network)
 
     def forward(self, state: torch.Tensor) -> torch.Tensor:
+        """Takes a state tensor and returns a probability distribution along the action space"""
         return self.network(state)
 
     def act(self, state: State) -> Tuple[Action, float]:
+        """Same as forward, instead of returning the entire distribution, we
+        return the maximum probability action
+        along with the log probability of that action
+        """
         # First we got to convert out of numpy and into pytorch
         state_tensor = torch.from_numpy(state).float().unsqueeze(0).to(device)
-        print(f"state: {state}")
-        print(f"state_unsqueezed: {np.expand_dims(state, axis=0)}")
-        pdf = self.forward(
-            state_tensor
-        ).cpu()  # TODO: If softmax produces a PDF, why do we need Categorical to sample from it?
-        print(f"PDF: {pdf}")
-        multinomial = Categorical(
-            pdf
-        )  # TODO: Study up on multinomial distributions and log probs
-        # TODO: Take the argmax of the pdf instead and see what happens!
-        print(f"Multinomial: {multinomial}")
-        action_idx = np.argmax(multinomial)  # type: ignore
-        return Action(action_idx.item()), multinomial.log_prob(action_idx)
+
+        # Now we can run the forward pass, whos output is a probability distribution
+        # along the action space
+        pdf = self.forward(state_tensor).cpu()
+
+        # Now we want to get the action that corresponds to the highest probability
+        action_idx = np.argmax(pdf)
+
+        # We return the action and the log probability of the action
+        return Action(action_idx.item()), np.log(pdf[action_idx])
 
 
 # %% [markdown]
-# # Training
+# # Training - REINFORCE
+#
+# This is the training loop for the REINFORCE algorithm.
 #
 # Training is done by assembling a sample of trajectories, which are lists of tuples of (state, action, reward).
+#
+# The algorithm is as follows:
+#
+# 1. Start with policy model $\pi_{\theta}$
+# 2. repeat:
+#     1. Generate an episode $S_0, A_0, r_1, ..., S_{T-1}, A_{T-1}, r_{T-1}$ following $\pi_{\theta}$
+#     2. for t from T-1 to 0:
+#         1. $G_t = \sum_{k=t}^{T-1} \gamma^{k-t} r_k$
+#     3. $L(\theta) = \frac{1}{T} \sum_{t=0}^{T-1} G_t \log \pi_{\theta}(a_t | s_t)$
+#     4. Optimize $\pi_{\theta}$ using $\nabla_{\theta} L(\theta)$
 
 # %%
 from dataclasses import dataclass
 
 
+# SAR stands for State, Action, Reward
 @dataclass
 class SAR:
     state: State
@@ -135,7 +151,9 @@ class SAR:
     log_prob: float
 
 
+# A list of SAR representing a single episode
 Trajectory = NewType("Trajectory", List[SAR])
+# A list of just the rewards from a single episode
 RewardTrajectory = NewType("RewardTrajectory", List[Reward])
 
 
@@ -164,12 +182,17 @@ def collect_episode(policy: Policy) -> Tuple[Trajectory, Reward]:
 
 
 # %%
-def cumulative_return(trajectory: RewardTrajectory, gamma: float = 0.5) -> float:
+import pytest
+
+
+def cumulative_discounted_reward(
+    trajectory: RewardTrajectory, gamma: float = 0.5
+) -> Reward:
     if len(trajectory) == 0:
         raise ValueError("Trajectory needs at least one item.")
     if len(trajectory) == 1:
         return 0.0
-    out: float = trajectory[1]
+    out = trajectory[1]
     if len(trajectory) == 2:
         return out
     for i in range(2, len(trajectory)):
@@ -183,12 +206,18 @@ def cumulative_return(trajectory: RewardTrajectory, gamma: float = 0.5) -> float
     "test_input,expected",
     [([0], 0), ([1, 1], 1), ([1, 1, 1], 1.5), ([1, 1, 1, 1], 1.75)],
 )
-def test_cumulative_return(test_input: RewardTrajectory, expected: float) -> None:
-    assert cumulative_return(test_input, gamma=0.5) == expected
+def test_cumulative_discounted_reward(
+    test_input: RewardTrajectory, expected: float
+) -> None:
+    assert cumulative_discounted_reward(test_input, gamma=0.5) == expected
 
 
 # %% [markdown]
 # # Run Tests
 
 # %%
+import ipytest
+
+ipytest.autoconfig()
+
 ipytest.run("-vv")
