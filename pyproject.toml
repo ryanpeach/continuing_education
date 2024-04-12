@@ -23,6 +23,7 @@ ple = {path = "submodules/PyGame-Learning-Environment"}
 plotly = "^5.20.0"
 sympy = "^1.12"
 tqdm = "^4.66.2"
+pandas = "^2.2.2"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.3.4"
