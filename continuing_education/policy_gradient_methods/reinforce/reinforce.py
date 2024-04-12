@@ -77,6 +77,7 @@ import numpy as np
 State = NewType("State", npt.NDArray[np.float64])
 Action = NewType("Action", int)
 Reward = NewType("Reward", float)
+LogProb = NewType("LogProb", float)
 
 # %%
 from typing import List, Tuple
@@ -125,7 +126,7 @@ class Policy(nn.Module):
         action_idx = np.argmax(pdf)
 
         # We return the action and the log probability of the action
-        return Action(action_idx.item()), np.log(pdf[action_idx])
+        return Action(action_idx.item()), float(np.log(pdf[action_idx]))
 
 
 # %% [markdown]
@@ -157,7 +158,7 @@ class SAR:
     state: State
     action: Action
     reward: Reward
-    log_prob: float
+    log_prob: LogProb
 
 
 # A list of SAR representing a single episode
@@ -180,7 +181,7 @@ def collect_episode(policy: Policy) -> Tuple[Trajectory, Reward]:
                 state=State(state),
                 action=action,
                 reward=Reward(reward),
-                log_prob=log_prob,
+                log_prob=LogProb(log_prob),
             )
         )
     return Trajectory(trajectory), Reward(sum(sar.reward for sar in trajectory))
@@ -196,9 +197,9 @@ def cumulative_discounted_reward(
     if len(trajectory) == 1:
         return RewardTrajectory([trajectory[0]])
     discounted_rewards: List[Reward] = []
-    cumulative_reward: Reward = 0
+    cumulative_reward: Reward = Reward(0)
     for reward in reversed(trajectory):
-        cumulative_reward = reward + gamma * cumulative_reward
+        cumulative_reward = Reward(reward + gamma * cumulative_reward)
         discounted_rewards.append(cumulative_reward)
     return RewardTrajectory(discounted_rewards[::-1])
 
