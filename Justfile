@@ -7,15 +7,15 @@ sync:
   poetry run jupytext --sync **/*.ipynb
 
 # Run the tests
-test: sync
+test:
   poetry run pytest continuing_education
 
 # Run the linters
-check: sync
+check:
   poetry run ruff check
   poetry run mypy .
 
 # Fix the code based on ruff
-fix: sync
+fix:
   poetry run ruff check --fix
   poetry run ruff format
