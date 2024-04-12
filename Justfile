@@ -13,7 +13,7 @@ test:
 # Run the linters
 check:
   poetry run ruff check
-  poetry run mypy .
+  poetry run mypy continuing_education
 
 # Fix the code based on ruff
 fix:
