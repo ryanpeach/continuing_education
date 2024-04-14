@@ -83,11 +83,8 @@ from torch import Tensor
 State = NewType("State", npt.NDArray[np.float64])
 Action = NewType("Action", int)
 Reward = NewType("Reward", float)
-
-# Probabilities are not the same as liklihoods
-# Watch this https://www.youtube.com/watch?v=pYxNSUDSFH4
 LogProb = NewType("LogProb", Tensor)
-LogLikelihood = NewType("LogLikelihood", Tensor)
+Loss = NewType("Loss", Tensor)
 
 # %%
 from typing import List, Tuple
@@ -142,6 +139,7 @@ class Policy(nn.Module):
         assert pdf.shape[-1] == self.action_size, "The output of the network should be a probability distribution over the action space"
 
         # Now we want to get the action that corresponds to the highest probability
+        # TODO: We could sample from the pdf instead of taking the greedy argmax
         action_idx = torch.argmax(pdf)
 
         # We also need the log probability of the action
@@ -304,17 +302,17 @@ if __name__ == "__main__":
 # %% [markdown]
 # Finally, this is the objective function. We want to sum the log probabilities of each action taken in the trajectory, multiplied by the discounted future rewards resulting from that action. We negate the log probabilities because we want to maximize the objective function, and the optimizer we are using is a minimizer. This is the REINFORCE score function.
 #
-# $\nabla_{\theta} J(\theta) = \sum_{t=0}^{T-1} \nabla_{\theta} \log \pi_{\theta}(a_t | s_t) G_t$
+# $J(\theta) = \frac{1}{T} \sum_{t=0}^{T-1} G_t \log \pi_{\theta}(a_t | s_t)$
 
 # %%
-def log_likelihood(policy: Policy, trajectory: Trajectory, gamma=0.5) -> LogLikelihood:
+def objective(policy: Policy, trajectory: Trajectory, gamma=0.5) -> Loss:
     """
     2.2.2 Returns the likelihood of a trajectory given a policy.
     Instead of doing 1/T, we normalize the cumulative discounted rewards as it says
     to do in the tutorial.
     Also we use torch.cat and sum for backprop reasons, so that backward can be called on the output.
     """
-    log_likelihoods = []
+    loss = []
     cum_disc_rewards = normalize(
         cumulative_discounted_future_rewards(
             RewardTrajectory([sar.reward for sar in trajectory]), gamma=gamma
@@ -322,20 +320,20 @@ def log_likelihood(policy: Policy, trajectory: Trajectory, gamma=0.5) -> LogLike
     )
     for cum_disc_reward, sar in zip(cum_disc_rewards, trajectory):
         _, action_log_prob = policy.act(sar.state)
-        log_likelihoods.append(cum_disc_reward * -action_log_prob)  # This is negative to turn maximization into minimization
-    return LogLikelihood(torch.cat(log_likelihoods).sum())
+        loss.append(cum_disc_reward * -action_log_prob)  # This is negative to turn maximization into minimization
+    return Loss(torch.cat(loss).sum())
 
 
 # %% [markdown]
 # Putting it all together, this is the training loop for the REINFORCE algorithm:
 #
-# 0. Start with policy model $\pi_{\theta}$
-# 1. repeat:
-#     0. Generate an episode $S_0, A_0, r_0, ..., S_{T-1}, A_{T-1}, r_{T-1}$ following $\pi_{\theta}$
-#     1. for t from T-1 to 0:
-#         0. $G_t = \sum_{k=t}^{T-1} \gamma^{k-t} r_k$
-#     2. $L(\theta) = \frac{1}{T} \sum_{t=0}^{T-1} G_t \log \pi_{\theta}(a_t | s_t)$
-#     3. Optimize $\pi_{\theta}$ using $\nabla_{\theta} L(\theta)$
+# 1. Start with policy model $\pi_{\theta}$
+# 2. repeat:
+#     1. Generate an episode $S_0, A_0, r_0, ..., S_{T-1}, A_{T-1}, r_{T-1}$ following $\pi_{\theta}$
+#     2. for t from T-1 to 0:
+#         1. $G_t = \sum_{k=t}^{T-1} \gamma^{k-t} r_k$
+#     3. $L(\theta) = \frac{1}{T} \sum_{t=0}^{T-1} G_t \log \pi_{\theta}(a_t | s_t)$
+#     4. Optimize $\pi_{\theta}$ using $\nabla_{\theta} L(\theta)$
 
 # %%
 from tqdm.notebook import trange
@@ -345,11 +343,12 @@ def reinforce_train(env: Env, policy: Policy, optimizer: optim.Optimizer, gamma=
     """Algorithm 1 REINFORCE"""
     scores = []
     for _ in trange(num_episodes):
+        # TODO: We could batch these episodes to get more stability
         trajectory = collect_episode(env, policy)
         scores.append(sum([sar.reward for sar in trajectory]))
-        policy_loss = log_likelihood(policy, trajectory, gamma=gamma)
+        policy_loss = objective(policy, trajectory, gamma=gamma)
         optimizer.zero_grad()
-        policy_loss.backward()
+        policy_loss.backward()  # This gives us the gradient
         optimizer.step()
     return scores
 
