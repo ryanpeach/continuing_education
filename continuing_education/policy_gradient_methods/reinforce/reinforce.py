@@ -19,7 +19,8 @@
 
 # %%
 from pathlib import Path
-__file__ = Path().resolve() / "reinforce.ipynb"
+if __name__ == "__main__":
+    __this_file = Path().resolve() / "reinforce.ipynb"  # jupyter does not have __file__
 
 # %%
 import torch
@@ -495,7 +496,7 @@ from continuing_education.lib.experiments import ExperimentManager
 if __name__=="__main__":
     fig = px.line(scores, title="Scores over time")
     fig.show()
-    ExperimentManager(name="Main Results", primary_metric="last_10_percent_mean", file=__file__).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
+    ExperimentManager(name="Main Results", primary_metric="last_10_percent_mean", file=__this_file).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
 
 
 # %% [markdown]
@@ -598,7 +599,7 @@ if __name__ == "__main__":
     last_10_percent_mean = sum(scores[int(NUM_EPISODES*0.9):]) / (NUM_EPISODES*0.1)
     fig = px.line(scores, title="Scores over time")
     fig.show()
-    ExperimentManager(name=f"Batch Size {BATCH_SIZE} + Sample Results", primary_metric="last_10_percent_mean", file=__file__).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
+    ExperimentManager(name=f"Batch Size {BATCH_SIZE} + Sample Results", primary_metric="last_10_percent_mean", file=__this_file).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
 
 # %% [markdown]
 # This is interesting. These changes actually seem to have hurt the training process. Lets see if its argmax or the batching that is the problem.
@@ -620,7 +621,7 @@ if __name__ == "__main__":
     last_10_percent_mean = sum(scores[int(NUM_EPISODES*0.9):]) / (NUM_EPISODES*0.1)
     fig = px.line(scores, title="Scores over time")
     fig.show()
-    ExperimentManager(name=f"Batch Size {BATCH_SIZE} + Argmax Results", primary_metric="last_10_percent_mean", file=__file__).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
+    ExperimentManager(name=f"Batch Size {BATCH_SIZE} + Argmax Results", primary_metric="last_10_percent_mean", file=__this_file).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
 
 # %% [markdown]
 # ### Sampling, no batching
@@ -640,7 +641,7 @@ if __name__ == "__main__":
     last_10_percent_mean = sum(scores[int(NUM_EPISODES*0.9):]) / (NUM_EPISODES*0.1)
     fig = px.line(scores, title="Scores over time")
     fig.show()
-    ExperimentManager(name=f"Batch Size {BATCH_SIZE} + Sample Results", primary_metric="last_10_percent_mean", file=__file__).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
+    ExperimentManager(name=f"Batch Size {BATCH_SIZE} + Sample Results", primary_metric="last_10_percent_mean", file=__this_file).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
 
 # %% [markdown]
 # ### Both, but with smaller batch size
@@ -660,7 +661,7 @@ if __name__ == "__main__":
     last_10_percent_mean = sum(scores[int(NUM_EPISODES*0.9):]) / (NUM_EPISODES*0.1)
     fig = px.line(scores, title="Scores over time")
     fig.show()
-    ExperimentManager(name=f"Batch Size {BATCH_SIZE} + Sample Results", primary_metric="last_10_percent_mean", file=__file__).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
+    ExperimentManager(name=f"Batch Size {BATCH_SIZE} + Sample Results", primary_metric="last_10_percent_mean", file=__this_file).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
 
 # %% [markdown]
 # ## Conclusion TODO
