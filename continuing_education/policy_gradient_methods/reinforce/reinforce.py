@@ -25,6 +25,7 @@ def get_torch_device() -> torch.device:
 
 if __name__ == "__main__":
     DEVICE = get_torch_device()
+    print(DEVICE)
 
 # %% [markdown]
 # # Reinforce
@@ -96,7 +97,7 @@ class Policy(nn.Module):
     and returns a probability distribution over the action space"""
 
     def __init__(
-        self, state_size: int, action_size: int, hidden_sizes: List[int]
+        self, *, state_size: int, action_size: int, hidden_sizes: List[int]
     ) -> None:
         """
         This is a very simple feed forward network
@@ -118,10 +119,11 @@ class Policy(nn.Module):
             network.append(nn.ReLU())
         network.append(nn.Linear(hidden_sizes[-1], action_size))  # Shape: (:, hidden_sizes[-1], action_size)
         network.append(nn.Softmax(dim=-1))  # Softmax along the action dimension
-        self.network = nn.Sequential(*network)
+        self.network = nn.Sequential(*network).to(DEVICE)
 
     def forward(self, state: torch.Tensor) -> torch.Tensor:
         """Takes a state tensor and returns a probability distribution along the action space"""
+        state = state.to(DEVICE)
         return self.network(state)
     
     def act(self, state: State) -> Tuple[Action, LogProb]:
@@ -130,13 +132,13 @@ class Policy(nn.Module):
         along with the log probability of that action
         """
         # First we got to convert out of numpy and into pytorch
-        state_tensor = torch.from_numpy(state).float().unsqueeze(0).to(DEVICE)
+        state_tensor = torch.from_numpy(state).float().unsqueeze(0)
 
         # Now we can run the forward pass, whos output is a probability distribution
         # along the action space
         pdf = self.forward(state_tensor)
-        assert torch.isclose(pdf.sum(), torch.Tensor([1.0])).all(), "The output of the network should be a probability distribution"
-        assert pdf.shape[-1] == self.action_size, "The output of the network should be a probability distribution over the action space"
+        assert torch.isclose(pdf.sum().cpu(), torch.Tensor([1.0])).all(), "The output of the network should be a probability distribution"
+        assert pdf.cpu().shape[-1] == self.action_size, "The output of the network should be a probability distribution over the action space"
 
         # Now we want to get the action that corresponds to the highest probability
         # TODO: We could sample from the pdf instead of taking the greedy argmax
@@ -155,7 +157,7 @@ class Policy(nn.Module):
 # %%
 # Lets print this model architecture
 if __name__ == "__main__":
-    policy = Policy(4, 2, [16, 16])
+    policy = Policy(state_size=4, action_size=2, hidden_sizes=[16, 16])
     print(policy.network)
 
 # %% [markdown]
@@ -218,7 +220,7 @@ def normalize(returns: Tensor) -> Tensor:
 # %%
 from gym import Env
 
-def collect_episode(env: Env, policy: Policy, max_t: int = 1000) -> Trajectory:
+def collect_episode(*, env: Env, policy: Policy, max_t: int = 1000) -> Trajectory:
     """2.1 Returns the trajectory of one episode of using the policy.
     
     The output is a list of SAR tuples, where each tuple represents a state, action, reward tuple.
@@ -258,7 +260,7 @@ def collect_episode(env: Env, policy: Policy, max_t: int = 1000) -> Trajectory:
 CumDiscFutureRewardTrajectory = NewType("CumDiscFutureRewardTrajectory", RewardTrajectory)
 
 def cumulative_discounted_future_rewards(
-    trajectory: RewardTrajectory, gamma: float = 0.5
+    *, trajectory: RewardTrajectory, gamma: float
 ) -> CumDiscFutureRewardTrajectory:
     """2.2.1 Returns the cumulative discounted future rewards of a trajectory at each step of the trajectory.
     
@@ -280,16 +282,16 @@ def test_cumulative_discounted_future_rewards() -> None:
     # It's important to test our code, so we know it works as expected
     # We tried to use ipytest but it wasn't working https://github.com/chmp/ipytest
     assert cumulative_discounted_future_rewards(
-        RewardTrajectory([-1]), gamma=0.5
+        trajectory=RewardTrajectory([-1]), gamma=0.5
     ) == RewardTrajectory([-1])
     assert cumulative_discounted_future_rewards(
-        RewardTrajectory([0]), gamma=0.5
+        trajectory=RewardTrajectory([0]), gamma=0.5
     ) == RewardTrajectory([0])
     assert cumulative_discounted_future_rewards(
-        RewardTrajectory([0, 1]), gamma=0.5
+        trajectory=RewardTrajectory([0, 1]), gamma=0.5
     ) == RewardTrajectory([0.5, 1])
     assert cumulative_discounted_future_rewards(
-        RewardTrajectory([0, 1, 1]), gamma=0.5
+        trajectory=RewardTrajectory([0, 1, 1]), gamma=0.5
     ) == RewardTrajectory([0.75, 1.5, 1])
 
 
@@ -305,7 +307,7 @@ if __name__ == "__main__":
 # $J(\theta) = \frac{1}{T} \sum_{t=0}^{T-1} G_t \log \pi_{\theta}(a_t | s_t)$
 
 # %%
-def objective(policy: Policy, trajectory: Trajectory, gamma=0.5) -> Loss:
+def objective(*, policy: Policy, trajectory: Trajectory, gamma: float) -> Loss:
     """
     2.2.2 Returns the likelihood of a trajectory given a policy.
     Instead of doing 1/T, we normalize the cumulative discounted rewards as it says
@@ -315,7 +317,7 @@ def objective(policy: Policy, trajectory: Trajectory, gamma=0.5) -> Loss:
     loss = []
     cum_disc_rewards = normalize(
         cumulative_discounted_future_rewards(
-            RewardTrajectory([sar.reward for sar in trajectory]), gamma=gamma
+            trajectory=RewardTrajectory([sar.reward for sar in trajectory]), gamma=gamma
         )
     )
     for cum_disc_reward, sar in zip(cum_disc_rewards, trajectory):
@@ -334,33 +336,46 @@ def objective(policy: Policy, trajectory: Trajectory, gamma=0.5) -> Loss:
 #         1. $G_t = \sum_{k=t}^{T-1} \gamma^{k-t} r_k$
 #     3. $L(\theta) = \frac{1}{T} \sum_{t=0}^{T-1} G_t \log \pi_{\theta}(a_t | s_t)$
 #     4. Optimize $\pi_{\theta}$ using $\nabla_{\theta} L(\theta)$
+#
+# We choose a gamma that is non-1 to discount future rewards, but especially in the cartpole environment, setting it very close to 1 is beneficial, because the longer the pole is balanced, the more reward we get.
+#
+# We choose a small neural network and a fast learning rate, because this is not a hard problem.
+#
+# However, we do need to train longer than the hugging face tutorial, and I'm unsure why.
 
 # %%
 from tqdm.notebook import trange
 import torch.optim as optim
 
-def reinforce_train(env: Env, policy: Policy, optimizer: optim.Optimizer, gamma=0.5, num_episodes=10000):
+def reinforce_train(*, env: Env, policy: Policy, optimizer: optim.Optimizer, gamma: float, num_episodes: int):
     """Algorithm 1 REINFORCE"""
+    assert gamma < 1, "Gamma should be less than 1"
+    assert gamma > 0, "Gamma should be greater than 0"
+    assert num_episodes > 0, "Number of episodes should be greater than 0"
     scores = []
     for _ in trange(num_episodes):
         # TODO: We could batch these episodes to get more stability
-        trajectory = collect_episode(env, policy)
+        trajectory = collect_episode(env=env, policy=policy)
         scores.append(sum([sar.reward for sar in trajectory]))
-        policy_loss = objective(policy, trajectory, gamma=gamma)
+        policy_loss = objective(policy=policy, trajectory=trajectory, gamma=gamma)
         optimizer.zero_grad()
         policy_loss.backward()  # This gives us the gradient
         optimizer.step()
     return scores
 
 if __name__ == "__main__":
+    LR = 1e-2
+    GAMMA = 0.999999999 # Cartpole benefits from a high gamma because the longer the pole is up, the higher the reward
+    HIDDEN_SIZES = [16, 16]
+    NUM_EPISODES= 10000
     env = gym.make("CartPole-v1")
     policy = Policy(
-        OBSERVATION_SPACE_SHAPE[0],
-        ACTION_SPACE_SIZE,
-        [16, 16],
+        state_size=OBSERVATION_SPACE_SHAPE[0],
+        action_size=ACTION_SPACE_SIZE,
+        hidden_sizes=HIDDEN_SIZES,
     ).to(DEVICE)
-    optimizer = optim.Adam(policy.parameters(), lr=1e-2)
-    scores = reinforce_train(env, policy, optimizer)
+    optimizer = optim.Adam(policy.parameters(), lr=LR)
+    scores = reinforce_train(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES)
 
 # %% [markdown]
 # # Results
@@ -371,8 +386,101 @@ if __name__ == "__main__":
 import plotly.express as px
 
 if __name__=="__main__":
-    fig = px.line(scores, log_y=True, title="log Scores over time")
+    fig = px.line(scores, title="Scores over time")
     fig.show()
+
+
+# %% [markdown]
+# # Improvements
+#
+# 1. We should sample from actions instead of taking the argmax
+# 2. We should take a batch of episodes and optimize on the batch
+#
+# These should minimize the instability of the training process seen in the above graph, where it sometimes looses the gains it has made.
+
+# %%
+class SamplePolicy(Policy):
+    """A classic policy network is one which takes in a state
+    and returns a probability distribution over the action space.
+    Act samples from the distribution instead of taking the greedy argmax."""
+
+    def act(self, state: State, *, argmax=False) -> Tuple[Action, LogProb]:
+        """Same as forward, instead of returning the entire distribution, we
+        sample from the distribution
+        along with the log probability of that action.
+        In testing mode, you can set argmax=True to take the greedy action.
+        """
+        # First we got to convert out of numpy and into pytorch
+        state_tensor = torch.from_numpy(state).float().unsqueeze(0).to(DEVICE)
+
+        # Now we can run the forward pass, whos output is a probability distribution
+        # along the action space
+        pdf = self.forward(state_tensor)
+        assert torch.isclose(pdf.sum().cpu(), torch.Tensor([1.0])).all(), "The output of the network should be a probability distribution"
+        assert pdf.cpu().shape[-1] == self.action_size, "The output of the network should be a probability distribution over the action space"
+
+        # Now we want to get the action that corresponds to the highest probability
+        # TODO: We could sample from the pdf instead of taking the greedy argmax
+        m = torch.distributions.Categorical(pdf)
+        if argmax:
+            action_idx = torch.argmax(pdf)
+        else:
+            action_idx = m.sample()
+
+        # We also need the log probability of the action
+        # However, we are going to do backprop through the log probability of the action
+        # Therefore this needs to stay as a tensor
+        # The Category distribution in torch has a method for a backprop friendly log probability of one action from a multinomial distribution
+        log_prob = m.log_prob(action_idx)
+
+        # We return the action and the log probability of the action
+        return Action(action_idx.item()), log_prob
+
+
+# %%
+# Make sure num_episodes * batch_size is the same as the original num_episodes to compare apples to apples
+def reinforce_train_batch(*, env: Env, policy: Policy, optimizer: optim.Optimizer, gamma: float, num_episodes: int, batch_size: int) -> None:
+    """Algorithm 1 REINFORCE"""
+    assert gamma < 1, "Gamma should be less than 1"
+    assert gamma > 0, "Gamma should be greater than 0"
+    assert num_episodes > 0, "Number of episodes should be greater than 0"
+    scores = []
+    for _ in trange(num_episodes):
+        policy_losses = []
+        _scores = []
+        for _ in range(batch_size):
+            trajectory = collect_episode(env=env, policy=policy)
+            _scores.append(sum([sar.reward for sar in trajectory]))
+            policy_losses.append(objective(policy=policy, trajectory=trajectory, gamma=gamma))
+        policy_loss = torch.stack(policy_losses).mean()
+        scores.append(sum(_scores) / batch_size)
+        optimizer.zero_grad()
+        policy_loss.backward()  # This gives us the gradient
+        optimizer.step()
+    return scores
+
+if __name__ == "__main__":
+    NEW_NUM_EPISODES = 1000
+    BATCH_SIZE = 10
+    env = gym.make("CartPole-v1")
+    policy = SamplePolicy(
+        state_size=OBSERVATION_SPACE_SHAPE[0],
+        action_size=ACTION_SPACE_SIZE,
+        hidden_sizes=HIDDEN_SIZES,
+    ).to(DEVICE)
+    optimizer = optim.Adam(policy.parameters(), lr=LR)
+    assert NEW_NUM_EPISODES * BATCH_SIZE == NUM_EPISODES
+    scores_batch = reinforce_train_batch(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NEW_NUM_EPISODES, batch_size=BATCH_SIZE)
+
+# %%
+import plotly.express as px
+
+if __name__=="__main__":
+    fig = px.line(scores_batch, title="Scores over time")
+    fig.show()
+
+# %% [markdown]
+# Notes: This ran much slower on cpu even though batch_size * num_episodes is the same as the other method. It's likely because of the increased pytorch usage in the batch method. 
 
 # %% [markdown]
 # # References
