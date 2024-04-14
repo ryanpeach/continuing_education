@@ -13,6 +13,10 @@
 #     name: python3
 # ---
 
+# %%
+# %load_ext autoreload
+# %autoreload 2
+
 # %% [markdown]
 # # Log Probabilities and Likelihood
 #
