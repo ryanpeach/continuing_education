@@ -20,11 +20,9 @@
 # %%
 import torch
 
-def get_torch_device() -> torch.device:
-    return torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 if __name__ == "__main__":
-    DEVICE = get_torch_device()
     print(DEVICE)
 
 # %% [markdown]
@@ -234,7 +232,7 @@ def collect_episode(*, env: Env, policy: Policy, max_t: int = 1000) -> Trajector
     trajectory = []
     for _ in range(max_t):
         action, log_prob = policy.act(state)
-        state, reward, done, _, _ = env.step(action)
+        next_state, reward, done, _, _ = env.step(action)
         trajectory.append(
             SAR(
                 state=State(state),
@@ -243,6 +241,7 @@ def collect_episode(*, env: Env, policy: Policy, max_t: int = 1000) -> Trajector
                 log_prob=LogProb(log_prob),
             )
         )
+        state = next_state
         if done:
             break
     return Trajectory(trajectory)
@@ -337,11 +336,6 @@ def objective(*, policy: Policy, trajectory: Trajectory, gamma: float) -> Loss:
 #     3. $L(\theta) = \frac{1}{T} \sum_{t=0}^{T-1} G_t \log \pi_{\theta}(a_t | s_t)$
 #     4. Optimize $\pi_{\theta}$ using $\nabla_{\theta} L(\theta)$
 #
-# We choose a gamma that is non-1 to discount future rewards, but especially in the cartpole environment, setting it very close to 1 is beneficial, because the longer the pole is balanced, the more reward we get.
-#
-# We choose a small neural network and a fast learning rate, because this is not a hard problem.
-#
-# However, we do need to train longer than the hugging face tutorial, and I'm unsure why.
 
 # %%
 from tqdm.notebook import trange
@@ -349,7 +343,7 @@ import torch.optim as optim
 
 def reinforce_train(*, env: Env, policy: Policy, optimizer: optim.Optimizer, gamma: float, num_episodes: int):
     """Algorithm 1 REINFORCE"""
-    assert gamma < 1, "Gamma should be less than 1"
+    assert gamma <= 1, "Gamma should be less than or equal to 1"
     assert gamma > 0, "Gamma should be greater than 0"
     assert num_episodes > 0, "Number of episodes should be greater than 0"
     scores = []
@@ -363,11 +357,118 @@ def reinforce_train(*, env: Env, policy: Policy, optimizer: optim.Optimizer, gam
         optimizer.step()
     return scores
 
+
+
+# %% [markdown]
+# ## Unit Testing NN's and Training Functions
+#
+#
+# First we want to unit test this on the simplest environment we can possibly think of, something that if it does not work it **guarenteed** to be a coding error. Something like "reward 1 if you repeat your input, 0 otherwise, end after 10 right answers."
+
+# %%
+import gym
+from gym import spaces
+import random
+
+from numpy import float32
+
+class MockEnv(gym.Env):
+    """A dead simple environment for reinforcement learning that rewards the agent for going left.
+    Useful for unit testing.
+    """
+    metadata = {'render.modes': ['human']}
+
+    def __init__(self, max_steps=10):
+        super().__init__()
+        self.action_space = spaces.Discrete(2)
+        self.observation_space = spaces.Discrete(1)
+        self.max_steps = max_steps
+        self.reset()
+
+    def step(self, action: Action) -> tuple[npt.NDArray[float32], Reward, bool, bool, dict]:
+        assert self.action_space.contains(action), f"Invalid Action: {action}"
+        
+        # If the state is 0, then the 0th action is the correct action
+        # If the state is 1, then the 1st action is the correct action
+        reward = 1 if action == self.state else -1
+        self.steps += 1
+        done = self.steps >= self.max_steps
+        if done:
+            return self.state, reward, done, False, {}
+        else:
+            self.state = np.array([random.choice([0.0, 1.0])])
+            return self.state, reward, done, False, {}
+        
+    def reset(self) -> tuple[npt.NDArray[float32], dict]:
+        self.state = np.array([random.choice([0.0, 1.0])])
+        self.steps = 0
+        return self.state, {}  # Return the first observation
+
+def test_mock_env_all_right() -> None:
+    """Manually check the behavior of the mock environment. Perform all actions correctly."""
+    max_steps = 10
+    env = MockEnv(max_steps=max_steps)
+    state, _ = env.reset()
+    for _ in range(max_steps-1):
+        next_state, reward, done, _, _ = env.step(int(state[0]))
+        assert reward == 1
+        assert done == False
+        state = next_state
+    next_state, reward, done, _, _ = env.step(int(state[0]))
+    assert reward == 1
+    assert done == True
+
+def test_mock_env_all_wrong() -> None:
+    """Manually check the behavior of the mock environment. Perform all actions incorrectly."""
+    max_steps = 10
+    env = MockEnv(max_steps=max_steps)
+    state, _ = env.reset()
+    for _ in range(max_steps-1):
+        next_state, reward, done, _, _ = env.step(1-int(state[0]))
+        assert reward == -1
+        assert done == False
+        state = next_state
+    next_state, reward, done, _, _ = env.step(1-int(state[0]))
+    assert reward == -1
+    assert done == True
+
+if __name__ == "__main__":
+    test_mock_env_all_right()
+    print("test_mock_env_all_right passed")
+    test_mock_env_all_wrong()
+    print("test_mock_env_all_wrong passed")
+
+
+# %%
+def test_reinforce_train() -> None:
+    """Test the reinforce training loop on the mock environment."""
+    env = MockEnv(max_steps=10)
+    policy = Policy(state_size=1, action_size=2, hidden_sizes=[16])
+    optimizer = optim.Adam(policy.parameters(), lr=1e-2)
+    scores = reinforce_train(env=env, policy=policy, optimizer=optimizer, gamma=1.0, num_episodes=100)
+    assert all([score == 10 for score in scores[90:]]), "The last 10 scores should be 10"
+
+if __name__ == "__main__":
+    test_reinforce_train()
+    print("test_reinforce_train passed")
+
+# %% [markdown]
+# ## Real Environment
+#
+# Now that this has passed, we can be confident nothing obvious is wrong with the code, and we can move on to the cartpole environment.
+#
+# We choose a gamma that is non-1 to discount future rewards, but especially in the cartpole environment, setting it very close to 1 is beneficial, because the longer the pole is balanced, the more reward we get.
+#
+# We choose a small neural network and a fast learning rate, because this is not a hard problem.
+#
+# However, we do need to train longer than the hugging face tutorial, and I'm unsure why.
+
+# %%
 if __name__ == "__main__":
     LR = 1e-2
-    GAMMA = 0.999999999 # Cartpole benefits from a high gamma because the longer the pole is up, the higher the reward
+    GAMMA = 1.0 # Cartpole benefits from a high gamma because the longer the pole is up, the higher the reward
     HIDDEN_SIZES = [16, 16]
-    NUM_EPISODES= 10000
+    NUM_EPISODES= 1000
     env = gym.make("CartPole-v1")
     policy = Policy(
         state_size=OBSERVATION_SPACE_SHAPE[0],
@@ -378,7 +479,7 @@ if __name__ == "__main__":
     scores = reinforce_train(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES)
 
 # %% [markdown]
-# # Results
+# ## Results
 #
 # It's pretty easy to tell if we succeeded or not. If the scores over time increase to the ceiling of `max_t` and stay there consistently, we have succeeded. If they do not, we have failed.
 
@@ -404,7 +505,7 @@ class SamplePolicy(Policy):
     and returns a probability distribution over the action space.
     Act samples from the distribution instead of taking the greedy argmax."""
 
-    def act(self, state: State, *, argmax=False) -> Tuple[Action, LogProb]:
+    def act(self, state: State) -> Tuple[Action, LogProb]:
         """Same as forward, instead of returning the entire distribution, we
         sample from the distribution
         along with the log probability of that action.
@@ -422,10 +523,7 @@ class SamplePolicy(Policy):
         # Now we want to get the action that corresponds to the highest probability
         # TODO: We could sample from the pdf instead of taking the greedy argmax
         m = torch.distributions.Categorical(pdf)
-        if argmax:
-            action_idx = torch.argmax(pdf)
-        else:
-            action_idx = m.sample()
+        action_idx = m.sample()
 
         # We also need the log probability of the action
         # However, we are going to do backprop through the log probability of the action
@@ -438,10 +536,9 @@ class SamplePolicy(Policy):
 
 
 # %%
-# Make sure num_episodes * batch_size is the same as the original num_episodes to compare apples to apples
 def reinforce_train_batch(*, env: Env, policy: Policy, optimizer: optim.Optimizer, gamma: float, num_episodes: int, batch_size: int) -> None:
     """Algorithm 1 REINFORCE"""
-    assert gamma < 1, "Gamma should be less than 1"
+    assert gamma <= 1, "Gamma should be less than or equal to 1"
     assert gamma > 0, "Gamma should be greater than 0"
     assert num_episodes > 0, "Number of episodes should be greater than 0"
     scores = []
@@ -459,8 +556,20 @@ def reinforce_train_batch(*, env: Env, policy: Policy, optimizer: optim.Optimize
         optimizer.step()
     return scores
 
+def test_reinforce_train_batch() -> None:
+    """Test the reinforce training loop on the mock environment."""
+    env = MockEnv(max_steps=10)
+    policy = SamplePolicy(state_size=1, action_size=2, hidden_sizes=[16])
+    optimizer = optim.Adam(policy.parameters(), lr=1e-2)
+    scores = reinforce_train_batch(env=env, policy=policy, optimizer=optimizer, gamma=1.0, num_episodes=100, batch_size=10)
+    assert all([score >= 9 for score in scores[90:]]), f"The last 10 scores should be 10, maybe some 9s. Got: {scores}"
+
 if __name__ == "__main__":
-    NEW_NUM_EPISODES = 1000
+    test_reinforce_train_batch()
+    print("test_reinforce_train_batch passed")
+
+# %%
+if __name__ == "__main__":
     BATCH_SIZE = 10
     env = gym.make("CartPole-v1")
     policy = SamplePolicy(
@@ -469,18 +578,48 @@ if __name__ == "__main__":
         hidden_sizes=HIDDEN_SIZES,
     ).to(DEVICE)
     optimizer = optim.Adam(policy.parameters(), lr=LR)
-    assert NEW_NUM_EPISODES * BATCH_SIZE == NUM_EPISODES
-    scores_batch = reinforce_train_batch(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NEW_NUM_EPISODES, batch_size=BATCH_SIZE)
-
-# %%
-import plotly.express as px
-
-if __name__=="__main__":
-    fig = px.line(scores_batch, title="Scores over time")
+    scores = reinforce_train_batch(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES, batch_size=BATCH_SIZE)
+    fig = px.line(scores, title="Scores over time")
     fig.show()
 
 # %% [markdown]
-# Notes: This ran much slower on cpu even though batch_size * num_episodes is the same as the other method. It's likely because of the increased pytorch usage in the batch method. 
+# This is interesting. These changes actually seem to have hurt the training process. Lets see if its argmax or the batching that is the problem.
+#
+# ### Argmax, with batching
+
+# %%
+if __name__ == "__main__":
+    BATCH_SIZE = 10
+    env = gym.make("CartPole-v1")
+    policy = Policy(
+        state_size=OBSERVATION_SPACE_SHAPE[0],
+        action_size=ACTION_SPACE_SIZE,
+        hidden_sizes=HIDDEN_SIZES,
+    ).to(DEVICE)
+    optimizer = optim.Adam(policy.parameters(), lr=LR)
+    scores = reinforce_train_batch(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES, batch_size=BATCH_SIZE)
+    fig = px.line(scores, title="Scores over time")
+    fig.show()
+
+# %% [markdown]
+# ## Sampling, no batching
+
+# %%
+if __name__ == "__main__":
+    BATCH_SIZE = 10
+    env = gym.make("CartPole-v1")
+    policy = SamplePolicy(
+        state_size=OBSERVATION_SPACE_SHAPE[0],
+        action_size=ACTION_SPACE_SIZE,
+        hidden_sizes=HIDDEN_SIZES,
+    ).to(DEVICE)
+    optimizer = optim.Adam(policy.parameters(), lr=LR)
+    scores = reinforce_train(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES)
+    fig = px.line(scores, title="Scores over time")
+    fig.show()
+
+# %% [markdown]
+# ## Conclusion TODO
 
 # %% [markdown]
 # # References
