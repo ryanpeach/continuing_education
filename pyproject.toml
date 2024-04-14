@@ -8,11 +8,10 @@ readme = "README.md"
 packages = []
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.11"
 gymnasium = "^0.29.1"
 numpy = "^1.26.4"
 pydantic = "^2.6.4"
-torch = "^2.2.1"
 pillow = "^10.2.0"
 pygame = "^2.5.2"
 gym-games = "^1.0.3"
