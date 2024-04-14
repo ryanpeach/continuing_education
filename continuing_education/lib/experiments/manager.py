@@ -9,22 +9,16 @@ class ExperimentManager:
     A simple git based experiment manager.
     Put this at the end of your training script, and when it runs, it will commit the changes to the current git branch with the results.
     """
-    def __init__(self, *, name: str, description: str = "", primary_metric: str = "", file: Path | None = None) -> None:
+    def __init__(self, *, name: str, file: Path, description: str = "", primary_metric: str = "") -> None:
         self.name = name
         self.description = description
         self.file = __file__ if file is None else file
         self.repo = Repo(search_parent_directories=True)
         self.primary_metric = primary_metric
 
-        # If we are running in a Jupyter notebook, with jupsync, also commit the .py file 
-        if self.is_jupytext:
-            pair = Path(__file__).with_suffix(".py")
-            if pair.exists():
-                self.files.append(pair)
-
     @property
     def is_jupytext(self) -> bool:
-        return self.file.endswith(".ipynb") and Path(self.file).with_suffix(".py").exists()
+        return self.file.suffix.endswith(".ipynb") and Path(self.file).with_suffix(".py").exists()
     
     def run_jupytext_sync(self):
         if self.is_jupytext:
