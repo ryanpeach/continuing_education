@@ -31,3 +31,11 @@ if __name__ == '__main__':
 - [ ] In mathematical language, document all implementations of all equations in the same notation as the source paper. Preferably you would do this in the functions docstrings, and cite the equation number in the paper. If it's a single line expression you can instead add a comment in the code.
 
 - [ ] Comment the shapes of any numpy arrays or torch tensors. Make assertions on the output.
+
+- [ ] Ask ChatGPT to review your work.
+
+- [ ] Functions that have more than one parameter should have a `*` before the first parameter to force the user to use named arguments.
+
+- [ ] Do not set default values, you might forget to pass parameters up the stack.
+
+- [ ] Make sure it runs on cpu and gpu
