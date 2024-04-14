@@ -18,6 +18,10 @@
 # %autoreload 2
 
 # %%
+from pathlib import Path
+__file__ = Path().resolve() / "reinforce.ipynb"
+
+# %%
 import torch
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -320,8 +324,7 @@ def objective(*, policy: Policy, trajectory: Trajectory, gamma: float) -> Loss:
         )
     )
     for cum_disc_reward, sar in zip(cum_disc_rewards, trajectory):
-        _, action_log_prob = policy.act(sar.state)
-        loss.append(cum_disc_reward * -action_log_prob)  # This is negative to turn maximization into minimization
+        loss.append(cum_disc_reward * -sar.log_prob)  # This is negative to turn maximization into minimization
     return Loss(torch.cat(loss).sum())
 
 
@@ -341,7 +344,7 @@ def objective(*, policy: Policy, trajectory: Trajectory, gamma: float) -> Loss:
 from tqdm.notebook import trange
 import torch.optim as optim
 
-def reinforce_train(*, env: Env, policy: Policy, optimizer: optim.Optimizer, gamma: float, num_episodes: int):
+def reinforce_train(*, env: Env, policy: Policy, optimizer: optim.Optimizer, gamma: float, num_episodes: int, max_t: int):
     """Algorithm 1 REINFORCE"""
     assert gamma <= 1, "Gamma should be less than or equal to 1"
     assert gamma > 0, "Gamma should be greater than 0"
@@ -349,7 +352,7 @@ def reinforce_train(*, env: Env, policy: Policy, optimizer: optim.Optimizer, gam
     scores = []
     for _ in trange(num_episodes):
         # TODO: We could batch these episodes to get more stability
-        trajectory = collect_episode(env=env, policy=policy)
+        trajectory = collect_episode(env=env, policy=policy, max_t=max_t)
         scores.append(sum([sar.reward for sar in trajectory]))
         policy_loss = objective(policy=policy, trajectory=trajectory, gamma=gamma)
         optimizer.zero_grad()
@@ -445,7 +448,7 @@ def test_reinforce_train() -> None:
     env = MockEnv(max_steps=10)
     policy = Policy(state_size=1, action_size=2, hidden_sizes=[16])
     optimizer = optim.Adam(policy.parameters(), lr=1e-2)
-    scores = reinforce_train(env=env, policy=policy, optimizer=optimizer, gamma=1.0, num_episodes=100)
+    scores = reinforce_train(env=env, policy=policy, optimizer=optimizer, gamma=1.0, num_episodes=100, max_t=10)
     assert all([score == 10 for score in scores[90:]]), "The last 10 scores should be 10"
 
 if __name__ == "__main__":
@@ -469,6 +472,7 @@ if __name__ == "__main__":
     GAMMA = 1.0 # Cartpole benefits from a high gamma because the longer the pole is up, the higher the reward
     HIDDEN_SIZES = [16, 16]
     NUM_EPISODES= 1000
+    MAX_T = 100
     env = gym.make("CartPole-v1")
     policy = Policy(
         state_size=OBSERVATION_SPACE_SHAPE[0],
@@ -476,7 +480,9 @@ if __name__ == "__main__":
         hidden_sizes=HIDDEN_SIZES,
     ).to(DEVICE)
     optimizer = optim.Adam(policy.parameters(), lr=LR)
-    scores = reinforce_train(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES)
+    scores = reinforce_train(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES, max_t=MAX_T)
+    # Calculate the mean of the last 10 % of the scores
+    last_10_percent_mean = sum(scores[int(NUM_EPISODES*0.9):]) / (NUM_EPISODES*0.1)
 
 # %% [markdown]
 # ## Results
@@ -485,11 +491,17 @@ if __name__ == "__main__":
 
 # %%
 import plotly.express as px
-
+from continuing_education.lib.experiments import ExperimentManager
 if __name__=="__main__":
     fig = px.line(scores, title="Scores over time")
     fig.show()
+    ExperimentManager(name="Main Results", primary_metric="last_10_percent_mean", file=__file__).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
 
+
+# %% [markdown]
+# ## Conclusions
+#
+# It's interesting how if you run this it will usually achieve the maximum score, and then get lost, and converge on a poor policy. Maybe this could be fixed with early stopping, or scheduling. But it goes to show how REINFORCE is a bit unstable. Future methods will remedy this.
 
 # %% [markdown]
 # # Improvements
@@ -536,8 +548,10 @@ class SamplePolicy(Policy):
 
 
 # %%
-def reinforce_train_batch(*, env: Env, policy: Policy, optimizer: optim.Optimizer, gamma: float, num_episodes: int, batch_size: int) -> None:
-    """Algorithm 1 REINFORCE"""
+def reinforce_train_batch(*, env: Env, policy: Policy, optimizer: optim.Optimizer, gamma: float, num_episodes: int, batch_size: int, max_t: int) -> None:
+    """Algorithm 1 REINFORCE modified to use batched episodes.
+    equivalent to reinforce_train if batch_size=1
+    """
     assert gamma <= 1, "Gamma should be less than or equal to 1"
     assert gamma > 0, "Gamma should be greater than 0"
     assert num_episodes > 0, "Number of episodes should be greater than 0"
@@ -546,7 +560,7 @@ def reinforce_train_batch(*, env: Env, policy: Policy, optimizer: optim.Optimize
         policy_losses = []
         _scores = []
         for _ in range(batch_size):
-            trajectory = collect_episode(env=env, policy=policy)
+            trajectory = collect_episode(env=env, policy=policy, max_t=max_t)
             _scores.append(sum([sar.reward for sar in trajectory]))
             policy_losses.append(objective(policy=policy, trajectory=trajectory, gamma=gamma))
         policy_loss = torch.stack(policy_losses).mean()
@@ -561,7 +575,7 @@ def test_reinforce_train_batch() -> None:
     env = MockEnv(max_steps=10)
     policy = SamplePolicy(state_size=1, action_size=2, hidden_sizes=[16])
     optimizer = optim.Adam(policy.parameters(), lr=1e-2)
-    scores = reinforce_train_batch(env=env, policy=policy, optimizer=optimizer, gamma=1.0, num_episodes=100, batch_size=10)
+    scores = reinforce_train_batch(env=env, policy=policy, optimizer=optimizer, gamma=1.0, num_episodes=100, batch_size=10, max_t=10)
     assert all([score >= 9 for score in scores[90:]]), f"The last 10 scores should be 10, maybe some 9s. Got: {scores}"
 
 if __name__ == "__main__":
@@ -571,6 +585,7 @@ if __name__ == "__main__":
 # %%
 if __name__ == "__main__":
     BATCH_SIZE = 10
+    NUM_EPISODES = 200
     env = gym.make("CartPole-v1")
     policy = SamplePolicy(
         state_size=OBSERVATION_SPACE_SHAPE[0],
@@ -578,9 +593,12 @@ if __name__ == "__main__":
         hidden_sizes=HIDDEN_SIZES,
     ).to(DEVICE)
     optimizer = optim.Adam(policy.parameters(), lr=LR)
-    scores = reinforce_train_batch(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES, batch_size=BATCH_SIZE)
+    scores = reinforce_train_batch(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES, batch_size=BATCH_SIZE, max_t=MAX_T)
+    # Calculate the mean of the last 10 % of the scores
+    last_10_percent_mean = sum(scores[int(NUM_EPISODES*0.9):]) / (NUM_EPISODES*0.1)
     fig = px.line(scores, title="Scores over time")
     fig.show()
+    ExperimentManager(name=f"Batch Size {BATCH_SIZE} + Sample Results", primary_metric="last_10_percent_mean", file=__file__).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
 
 # %% [markdown]
 # This is interesting. These changes actually seem to have hurt the training process. Lets see if its argmax or the batching that is the problem.
@@ -597,16 +615,19 @@ if __name__ == "__main__":
         hidden_sizes=HIDDEN_SIZES,
     ).to(DEVICE)
     optimizer = optim.Adam(policy.parameters(), lr=LR)
-    scores = reinforce_train_batch(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES, batch_size=BATCH_SIZE)
+    scores = reinforce_train_batch(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES, batch_size=BATCH_SIZE, max_t=MAX_T)
+    # Calculate the mean of the last 10 % of the scores
+    last_10_percent_mean = sum(scores[int(NUM_EPISODES*0.9):]) / (NUM_EPISODES*0.1)
     fig = px.line(scores, title="Scores over time")
     fig.show()
+    ExperimentManager(name=f"Batch Size {BATCH_SIZE} + Argmax Results", primary_metric="last_10_percent_mean", file=__file__).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
 
 # %% [markdown]
-# ## Sampling, no batching
+# ### Sampling, no batching
 
 # %%
 if __name__ == "__main__":
-    BATCH_SIZE = 10
+    BATCH_SIZE = 1
     env = gym.make("CartPole-v1")
     policy = SamplePolicy(
         state_size=OBSERVATION_SPACE_SHAPE[0],
@@ -614,9 +635,32 @@ if __name__ == "__main__":
         hidden_sizes=HIDDEN_SIZES,
     ).to(DEVICE)
     optimizer = optim.Adam(policy.parameters(), lr=LR)
-    scores = reinforce_train(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES)
+    scores = reinforce_train(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES, max_t=MAX_T)
+    # Calculate the mean of the last 10 % of the scores
+    last_10_percent_mean = sum(scores[int(NUM_EPISODES*0.9):]) / (NUM_EPISODES*0.1)
     fig = px.line(scores, title="Scores over time")
     fig.show()
+    ExperimentManager(name=f"Batch Size {BATCH_SIZE} + Sample Results", primary_metric="last_10_percent_mean", file=__file__).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
+
+# %% [markdown]
+# ### Both, but with smaller batch size
+
+# %%
+if __name__ == "__main__":
+    BATCH_SIZE = 2
+    env = gym.make("CartPole-v1")
+    policy = SamplePolicy(
+        state_size=OBSERVATION_SPACE_SHAPE[0],
+        action_size=ACTION_SPACE_SIZE,
+        hidden_sizes=HIDDEN_SIZES,
+    ).to(DEVICE)
+    optimizer = optim.Adam(policy.parameters(), lr=LR)
+    scores = reinforce_train_batch(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES, batch_size=BATCH_SIZE, max_t=MAX_T)
+    # Calculate the mean of the last 10 % of the scores
+    last_10_percent_mean = sum(scores[int(NUM_EPISODES*0.9):]) / (NUM_EPISODES*0.1)
+    fig = px.line(scores, title="Scores over time")
+    fig.show()
+    ExperimentManager(name=f"Batch Size {BATCH_SIZE} + Sample Results", primary_metric="last_10_percent_mean", file=__file__).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
 
 # %% [markdown]
 # ## Conclusion TODO
