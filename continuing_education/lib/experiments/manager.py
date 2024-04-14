@@ -3,6 +3,7 @@ import os
 from pprint import pformat
 import warnings
 from git import Repo
+import subprocess
 
 class ExperimentManager:
     """
@@ -12,8 +13,7 @@ class ExperimentManager:
     def __init__(self, *, name: str, file: Path, description: str = "", primary_metric: str = "") -> None:
         self.name = name
         self.description = description
-        self.file = __file__ if file is None else file
-        self.repo = Repo(search_parent_directories=True)
+        self.file = file
         self.primary_metric = primary_metric
 
     @property
@@ -22,27 +22,31 @@ class ExperimentManager:
     
     def run_jupytext_sync(self):
         if self.is_jupytext:
-            os.system(f"jupytext --sync {self.file}")
+            cmd = ["jupytext", "--sync", str(self.file.absolute())]
+            print("Running: ", " ".join(cmd))
+            subprocess.run(cmd, check=True)
 
     def commit(self, metrics: dict[str, float] | None = None):
+        repo = Repo(path=self.file.absolute().parent, search_parent_directories=True)
         if metrics is None:
             metrics = {}
         self.run_jupytext_sync()
 
         # Staging files
-        self.repo.git.add(self.file)
+        files = [self.file.relative_to(repo.working_dir)]
         if self.is_jupytext:
-            self.repo.git.add(Path(self.file).with_suffix('.py'))
+            files.append(self.file.relative_to(repo.working_dir).with_suffix('.py'))
+        repo.index.add(files)
 
         # Check for unstaged changes
-        if self.repo.is_dirty(untracked_files=True):
+        if repo.is_dirty(untracked_files=True):
             warnings.warn("There are unstaged changes in the repository. Please commit or stage them before running the experiment manager.")
-      
+        
         # Committing changes
         if self.primary_metric in metrics:
             commit_message = f"Experiment: {self.name}, {self.primary_metric}: {metrics[self.primary_metric]}"
         else:
             commit_message = f"Experiment: {self.name}"
         detailed_message = f"{self.description}\n\nResults:\n{pformat(metrics)}".strip()
-        self.repo.git.commit('--allow-empty', '-m', commit_message, '-m', detailed_message)
+        repo.index.commit(message=commit_message+"\n\n"+detailed_message, skip_hooks=True)
     
