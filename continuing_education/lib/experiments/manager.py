@@ -31,8 +31,8 @@ class ExperimentManager:
             os.system(f"jupytext --sync {self.file}")
 
     def commit(self, metrics: dict[str, float] | None = None):
-        if other_metrics is None:
-            other_metrics = {}
+        if metrics is None:
+            metrics = {}
         self.run_jupytext_sync()
 
         # Staging files
