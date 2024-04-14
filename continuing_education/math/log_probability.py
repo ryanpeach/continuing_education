@@ -18,7 +18,7 @@
 # %autoreload 2
 
 # %% [markdown]
-# # Log Probabilities and Likelihood
+# # Log Probabilities and Likelihoods
 #
 # Log probabilities and likelihoods come up a lot in machine learning, and I'm constantly
 # referring back to their definitions. So I thought I'd write a quick note on them.
@@ -50,6 +50,10 @@ if __name__ == "__main__":
 # %% [markdown]
 # It's asymptotic to negative infinity at 0, and equal to 0 at 1.
 #
+# The key insight is that since probabilities infinitely approach but rarely equal 0 or 1, the log of a probability amplifies both extremes. Probabilities very close to 1 will similarly be very close to 0 in log space, and probabilities very close to 0 will be very negative in log space.
+#
+# ## Equalities and Computational Efficiency
+#
 # Next lets remember some mathematical properties of logs.
 # * They turn multiplication into addition: $\log(a \cdot b) = \log(a) + \log(b)$
 # * They turn division into subtraction: $\log(a / b) = \log(a) - \log(b)$
@@ -80,3 +84,43 @@ def logarithm_properties() -> None:
 
 if __name__ == "__main__":
     logarithm_properties()
+
+# %% [markdown]
+# These properties are useful in machine learning because they allow us to turn products of probabilities into sums of log probabilities, which are easier computationally.
+#
+
+# %% [markdown]
+# ## Loss Functions
+#
+# Finally, when we use a log probability in a loss function, because its asymptotic at P(0) and 0 at P(1) it has a much better gradient than a regular probability. This is why we often use log probabilities in loss functions.
+#
+# For example look at the REINFORCE score function:
+#
+# $J(\theta) = \frac{1}{T} \sum_{t=0}^{T-1} G_t \log \pi_{\theta}(a_t | s_t)$
+#
+# Simplified:
+#
+# $J(\theta) = \sum_{t=0}^{T-1} G_t \log \pi_{\theta}(a_t | s_t)$
+#
+# The loss function (minimized by gradient descent) becomes:
+#
+# $L(\theta) = \sum_{t=0}^{T-1} G_t (-\log \pi_{\theta}(a_t | s_t))$
+#
+# Where $G_t$ is the cumulative discounted future reward at time $t$, and $\pi_{\theta}(a_t | s_t)$ is the probability of taking action $a_t$ in state $s_t$ under policy $\pi_{\theta}$.
+#
+# Lets make a table relating $\pi_{\theta}(a_t | s_t)$ to the reward $G_t$ assuming the possible rewards are 0 and 1:
+#
+#
+# | $\pi_{\theta}(a_t \| s_t)$ | $G_t$ | $-G_t \log \pi_{\theta}(a_t \| s_t)$ |
+# |:-------------------------:|:-----:|:-----------------------------------:|
+# | 0.01                      | 1.0   |  2                                  |
+# | 0.1                       | 1.0   |  1                                  |
+# | 0.5                       | 1.0   |  0.301                              |
+# | 0.9                       | 1.0   |  0.045                              |
+# | 0.99                      | 1.0   |  0.0043                             |
+#
+#
+# And 0 whenever $G_t$ is 0. Assuming that's the negative reward.
+#
+# What this tells us is that the loss function will get asymptotically closer to 0 as the probability of the action taken approaches 1. It will also explode into the positives as the probability of the action taken approaches 0. For positive rewards, this is good because it will push the probability of actions which lead to positive rewards towards 1. 
+#
