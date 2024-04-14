@@ -468,12 +468,16 @@ if __name__ == "__main__":
 # However, we do need to train longer than the hugging face tutorial, and I'm unsure why.
 
 # %%
+import plotly.express as px
+from continuing_education.lib.experiments import ExperimentManager
+
 if __name__ == "__main__":
     LR = 1e-2
     GAMMA = 1.0 # Cartpole benefits from a high gamma because the longer the pole is up, the higher the reward
     HIDDEN_SIZES = [16, 16]
     NUM_EPISODES= 1000
     MAX_T = 100
+    for 
     env = gym.make("CartPole-v1")
     policy = Policy(
         state_size=OBSERVATION_SPACE_SHAPE[0],
@@ -484,25 +488,10 @@ if __name__ == "__main__":
     scores = reinforce_train(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES, max_t=MAX_T)
     # Calculate the mean of the last 10 % of the scores
     last_10_percent_mean = sum(scores[int(NUM_EPISODES*0.9):]) / (NUM_EPISODES*0.1)
-
-# %% [markdown]
-# ## Results
-#
-# It's pretty easy to tell if we succeeded or not. If the scores over time increase to the ceiling of `max_t` and stay there consistently, we have succeeded. If they do not, we have failed.
-
-# %%
-import plotly.express as px
-from continuing_education.lib.experiments import ExperimentManager
-if __name__=="__main__":
     fig = px.line(scores, title="Scores over time")
     fig.show()
     ExperimentManager(name="REINFORCE", description="Main Results", primary_metric="last_10_percent_mean", file=__this_file).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
 
-
-# %% [markdown]
-# ## Conclusions
-#
-# It's interesting how if you run this it will usually achieve the maximum score, and then get lost, and converge on a poor policy. Maybe this could be fixed with early stopping, or scheduling. But it goes to show how REINFORCE is a bit unstable. Future methods will remedy this.
 
 # %% [markdown]
 # # Improvements
@@ -602,7 +591,10 @@ if __name__ == "__main__":
     ExperimentManager(name="REINFORCE", description=f"Batch Size {BATCH_SIZE} + Sample Results", primary_metric="last_10_percent_mean", file=__this_file).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
 
 # %% [markdown]
-# This is interesting. These changes actually seem to have hurt the training process. Lets see if its argmax or the batching that is the problem.
+# Out of three runs:
+#
+# 1. Did very well and achieved the maximum score `git_commit:a3ccdfdd4b2dcd079f09cb9fffa1adfff47696d8`
+# 2. 
 #
 # ### Argmax, with batching
 
