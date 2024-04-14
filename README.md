@@ -4,13 +4,23 @@ Some projects I'm using to learn AI since my MS
 
 # TODO
 
-* [ ] Proximal Policy Optimization (PPO)
+* Reinforcement Learning
+    * [X] Value Based Methods - It's not implemented here, but from my MS I feel I'm already an "expert" in Q-Learning up to and including RAINBOW.
+    * Policy Based Methods
+        * [X] REINFORCE
+        * [ ] Actor-Critic 2
+        * [ ] Proximal Policy Optimization (PPO)
+        * [ ] RLHF
+    * [ ] Model Based Reinforcement Learning
+    * [ ] Exploration in RL
+* Transformers
+    * [ ] Tokenization
+    * [ ] Word Embeddings
+    * [ ] Transformers
+    * [ ] Self Implemented LLM
+    * [ ] Multimodality
+* [ ] Diffusion Models
 * [ ] Graph Neural Networks (GNN)
-* [ ] Transformers / LLMS
-* [ ] Model Based Reinforcement Learning
-* [ ] Exploration in RL
-* [ ] RLHF
-* [ ] Stable Diffusion
 
 ## Sources for further work
 
@@ -27,6 +37,8 @@ Then make sure you have cloned the submodules:
 Then install the dependencies:
 
 `poetry install`
+
+After you run `poetry install`, `pip` install pytorch the way it describes [here](https://pytorch.org/get-started/locally/#start-locally) for your system. This ensures you get the best performance.
 
 ## MacOSX
 

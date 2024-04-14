@@ -20,6 +20,14 @@ if __name__ == '__main__':
     foo()
 ```
 
+- [ ] APA style citations for all sources at the bottom.
+
+- [ ] Actually read the paper you cite, not just the tutorial
+
+- [ ] Make logseq compatible flash cards. Save them to a readme in the same folder as the notebook.
+
 - [ ] In natural language, explain your understanding of the solution.
 
 - [ ] In mathematical language, document all implementations of all equations in the same notation as the source paper. Preferably you would do this in the functions docstrings, and cite the equation number in the paper. If it's a single line expression you can instead add a comment in the code.
+
+- [ ] Comment the shapes of any numpy arrays or torch tensors. Make assertions on the output.
