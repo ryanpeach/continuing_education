@@ -475,9 +475,10 @@ if __name__ == "__main__":
     LR = 1e-2
     GAMMA = 1.0 # Cartpole benefits from a high gamma because the longer the pole is up, the higher the reward
     HIDDEN_SIZES = [16, 16]
-    NUM_EPISODES= 1000
+    NUM_EPISODES= 10000
     MAX_T = 100
     # Do this a few times to prove consistency
+    last_10_percent_mean = []
     for _ in range(3):
         env = gym.make("CartPole-v1")
         policy = Policy(
@@ -577,18 +578,21 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     BATCH_SIZE = 10
     NUM_EPISODES = 200
-    env = gym.make("CartPole-v1")
-    policy = SamplePolicy(
-        state_size=OBSERVATION_SPACE_SHAPE[0],
-        action_size=ACTION_SPACE_SIZE,
-        hidden_sizes=HIDDEN_SIZES,
-    ).to(DEVICE)
-    optimizer = optim.Adam(policy.parameters(), lr=LR)
-    scores = reinforce_train_batch(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES, batch_size=BATCH_SIZE, max_t=MAX_T)
-    # Calculate the mean of the last 10 % of the scores
-    last_10_percent_mean = sum(scores[int(NUM_EPISODES*0.9):]) / (NUM_EPISODES*0.1)
-    fig = px.line(scores, title="Scores over time")
-    fig.show()
+    # Do this a few times to prove consistency
+    last_10_percent_mean = []
+    for _ in range(3):
+        env = gym.make("CartPole-v1")
+        policy = SamplePolicy(
+            state_size=OBSERVATION_SPACE_SHAPE[0],
+            action_size=ACTION_SPACE_SIZE,
+            hidden_sizes=HIDDEN_SIZES,
+        ).to(DEVICE)
+        optimizer = optim.Adam(policy.parameters(), lr=LR)
+        scores = reinforce_train_batch(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES, batch_size=BATCH_SIZE, max_t=MAX_T)
+        # Calculate the mean of the last 10 % of the scores
+        last_10_percent_mean.append(sum(scores[int(NUM_EPISODES*0.9):]) / (NUM_EPISODES*0.1))
+        fig = px.line(scores, title="Scores over time")
+        fig.show()
     ExperimentManager(name="REINFORCE", description=f"Batch Size {BATCH_SIZE} + Sample Results", primary_metric="last_10_percent_mean", file=__this_file).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
 
 # %% [markdown]
@@ -602,18 +606,21 @@ if __name__ == "__main__":
 # %%
 if __name__ == "__main__":
     BATCH_SIZE = 10
-    env = gym.make("CartPole-v1")
-    policy = Policy(
-        state_size=OBSERVATION_SPACE_SHAPE[0],
-        action_size=ACTION_SPACE_SIZE,
-        hidden_sizes=HIDDEN_SIZES,
-    ).to(DEVICE)
-    optimizer = optim.Adam(policy.parameters(), lr=LR)
-    scores = reinforce_train_batch(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES, batch_size=BATCH_SIZE, max_t=MAX_T)
-    # Calculate the mean of the last 10 % of the scores
-    last_10_percent_mean = sum(scores[int(NUM_EPISODES*0.9):]) / (NUM_EPISODES*0.1)
-    fig = px.line(scores, title="Scores over time")
-    fig.show()
+    # Do this a few times to prove consistency
+    last_10_percent_mean = []
+    for _ in range(3):
+        env = gym.make("CartPole-v1")
+        policy = Policy(
+            state_size=OBSERVATION_SPACE_SHAPE[0],
+            action_size=ACTION_SPACE_SIZE,
+            hidden_sizes=HIDDEN_SIZES,
+        ).to(DEVICE)
+        optimizer = optim.Adam(policy.parameters(), lr=LR)
+        scores = reinforce_train_batch(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES, batch_size=BATCH_SIZE, max_t=MAX_T)
+        # Calculate the mean of the last 10 % of the scores
+        last_10_percent_mean.append(sum(scores[int(NUM_EPISODES*0.9):]) / (NUM_EPISODES*0.1))
+        fig = px.line(scores, title="Scores over time")
+        fig.show()
     ExperimentManager(name="REINFORCE", description=f"Batch Size {BATCH_SIZE} + Argmax Results", primary_metric="last_10_percent_mean", file=__this_file).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
 
 # %% [markdown]
@@ -622,18 +629,21 @@ if __name__ == "__main__":
 # %%
 if __name__ == "__main__":
     BATCH_SIZE = 1
-    env = gym.make("CartPole-v1")
-    policy = SamplePolicy(
-        state_size=OBSERVATION_SPACE_SHAPE[0],
-        action_size=ACTION_SPACE_SIZE,
-        hidden_sizes=HIDDEN_SIZES,
-    ).to(DEVICE)
-    optimizer = optim.Adam(policy.parameters(), lr=LR)
-    scores = reinforce_train(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES, max_t=MAX_T)
-    # Calculate the mean of the last 10 % of the scores
-    last_10_percent_mean = sum(scores[int(NUM_EPISODES*0.9):]) / (NUM_EPISODES*0.1)
-    fig = px.line(scores, title="Scores over time")
-    fig.show()
+    # Do this a few times to prove consistency
+    last_10_percent_mean = []
+    for _ in range(3):
+        env = gym.make("CartPole-v1")
+        policy = SamplePolicy(
+            state_size=OBSERVATION_SPACE_SHAPE[0],
+            action_size=ACTION_SPACE_SIZE,
+            hidden_sizes=HIDDEN_SIZES,
+        ).to(DEVICE)
+        optimizer = optim.Adam(policy.parameters(), lr=LR)
+        scores = reinforce_train(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES, max_t=MAX_T)
+        # Calculate the mean of the last 10 % of the scores
+        last_10_percent_mean.append(sum(scores[int(NUM_EPISODES*0.9):]) / (NUM_EPISODES*0.1))
+        fig = px.line(scores, title="Scores over time")
+        fig.show()
     ExperimentManager(name="REINFORCE", description=f"Batch Size {BATCH_SIZE} + Sample Results", primary_metric="last_10_percent_mean", file=__this_file).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
 
 # %% [markdown]
@@ -642,18 +652,21 @@ if __name__ == "__main__":
 # %%
 if __name__ == "__main__":
     BATCH_SIZE = 2
-    env = gym.make("CartPole-v1")
-    policy = SamplePolicy(
-        state_size=OBSERVATION_SPACE_SHAPE[0],
-        action_size=ACTION_SPACE_SIZE,
-        hidden_sizes=HIDDEN_SIZES,
-    ).to(DEVICE)
-    optimizer = optim.Adam(policy.parameters(), lr=LR)
-    scores = reinforce_train_batch(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES, batch_size=BATCH_SIZE, max_t=MAX_T)
-    # Calculate the mean of the last 10 % of the scores
-    last_10_percent_mean = sum(scores[int(NUM_EPISODES*0.9):]) / (NUM_EPISODES*0.1)
-    fig = px.line(scores, title="Scores over time")
-    fig.show()
+    # Do this a few times to prove consistency
+    last_10_percent_mean = []
+    for _ in range(3):
+        env = gym.make("CartPole-v1")
+        policy = SamplePolicy(
+            state_size=OBSERVATION_SPACE_SHAPE[0],
+            action_size=ACTION_SPACE_SIZE,
+            hidden_sizes=HIDDEN_SIZES,
+        ).to(DEVICE)
+        optimizer = optim.Adam(policy.parameters(), lr=LR)
+        scores = reinforce_train_batch(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES, batch_size=BATCH_SIZE, max_t=MAX_T)
+        # Calculate the mean of the last 10 % of the scores
+        last_10_percent_mean.append(sum(scores[int(NUM_EPISODES*0.9):]) / (NUM_EPISODES*0.1))
+        fig = px.line(scores, title="Scores over time")
+        fig.show()
     ExperimentManager(name="REINFORCE", description=f"Batch Size {BATCH_SIZE} + Sample Results", primary_metric="last_10_percent_mean", file=__this_file).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
 
 # %% [markdown]
