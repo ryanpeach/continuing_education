@@ -477,19 +477,20 @@ if __name__ == "__main__":
     HIDDEN_SIZES = [16, 16]
     NUM_EPISODES= 1000
     MAX_T = 100
-    for 
-    env = gym.make("CartPole-v1")
-    policy = Policy(
-        state_size=OBSERVATION_SPACE_SHAPE[0],
-        action_size=ACTION_SPACE_SIZE,
-        hidden_sizes=HIDDEN_SIZES,
-    ).to(DEVICE)
-    optimizer = optim.Adam(policy.parameters(), lr=LR)
-    scores = reinforce_train(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES, max_t=MAX_T)
-    # Calculate the mean of the last 10 % of the scores
-    last_10_percent_mean = sum(scores[int(NUM_EPISODES*0.9):]) / (NUM_EPISODES*0.1)
-    fig = px.line(scores, title="Scores over time")
-    fig.show()
+    # Do this a few times to prove consistency
+    for _ in range(3):
+        env = gym.make("CartPole-v1")
+        policy = Policy(
+            state_size=OBSERVATION_SPACE_SHAPE[0],
+            action_size=ACTION_SPACE_SIZE,
+            hidden_sizes=HIDDEN_SIZES,
+        ).to(DEVICE)
+        optimizer = optim.Adam(policy.parameters(), lr=LR)
+        scores = reinforce_train(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES, max_t=MAX_T)
+        # Calculate the mean of the last 10 % of the scores
+        last_10_percent_mean.append(sum(scores[int(NUM_EPISODES*0.9):]) / (NUM_EPISODES*0.1))
+        fig = px.line(scores, title="Scores over time")
+        fig.show()
     ExperimentManager(name="REINFORCE", description="Main Results", primary_metric="last_10_percent_mean", file=__this_file).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
 
 
