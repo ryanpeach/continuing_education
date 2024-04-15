@@ -45,18 +45,20 @@ if __name__ == "__main__":
 
 # %%
 import gym
+from typing import cast
 
 def get_environment_space(env_name: str) -> tuple[tuple[int, ...], int]:
     env = gym.make(env_name)
     observation_space_shape = env.observation_space.shape
-    action_space_size = env.action_space.n
+    assert observation_space_shape is not None, "Observation space shape should not be None"
+    action_space_size = env.action_space.n  # type: ignore[attr-defined]
     print("State size:", observation_space_shape)
     print("Action size:", action_space_size)
     state = env.reset()
     print(f"Example state: {state}")
     action_return = env.step(1)
     print(f"Action return: {action_return}")
-    return observation_space_shape, action_space_size
+    return observation_space_shape, cast(int, action_space_size)
 
 if __name__=="__main__":
     OBSERVATION_SPACE_SHAPE, ACTION_SPACE_SIZE = get_environment_space("CartPole-v1")
@@ -84,7 +86,7 @@ import numpy as np
 from torch import Tensor
 
 # Lets make some types to make type annotation easier
-State = NewType("State", npt.NDArray[np.float64])
+State = NewType("State", npt.NDArray[np.float32])
 Action = NewType("Action", int)
 Reward = NewType("Reward", float)
 LogProb = NewType("LogProb", Tensor)
@@ -114,7 +116,7 @@ class Policy(nn.Module):
         self.hidden_sizes = hidden_sizes
 
         # Dimensions in the network are (batch_size, input_size, output_size)
-        network = []
+        network: list[nn.Module] = []
         network.append(nn.Linear(state_size, hidden_sizes[0]))  # Shape: (:, state_size, hidden_sizes[0])
         network.append(nn.ReLU())
         for i in range(len(hidden_sizes) - 1):
@@ -154,7 +156,7 @@ class Policy(nn.Module):
         log_prob = torch.distributions.Categorical(pdf).log_prob(action_idx)
 
         # We return the action and the log probability of the action
-        return Action(action_idx.item()), log_prob
+        return Action(int(action_idx.item())), LogProb(log_prob)
 
 
 # %%
@@ -194,7 +196,7 @@ RewardTrajectory = NewType("RewardTrajectory", List[Reward])
 # And here is a nice helper function I found in the hugging face tutorial for normalization in pytorch.
 
 # %%
-def normalize(returns: Tensor) -> Tensor:
+def normalize(returns: Tensor | list[float] | npt.NDArray[np.float32]) -> Tensor:
     """
     Standard normalizes a tensor of float32s using the mean and standard deviation.
     Handles floating point errors by adding a small epsilon to the denominator to avoid division by zero.
@@ -261,7 +263,7 @@ def collect_episode(*, env: Env, policy: Policy, max_t: int = 1000) -> Trajector
 # This is different than a reward trajectory
 # because each index is the discounted sum of future indexes
 # in the corresponding reward trajectory
-CumDiscFutureRewardTrajectory = NewType("CumDiscFutureRewardTrajectory", RewardTrajectory)
+CumDiscFutureRewardTrajectory = NewType("CumDiscFutureRewardTrajectory", list[Reward])
 
 def cumulative_discounted_future_rewards(
     *, trajectory: RewardTrajectory, gamma: float
@@ -273,30 +275,30 @@ def cumulative_discounted_future_rewards(
     if len(trajectory) == 0:
         raise ValueError("Trajectory needs at least one item.")
     if len(trajectory) == 1:
-        return RewardTrajectory([trajectory[0]])
+        return CumDiscFutureRewardTrajectory([trajectory[0]])
     discounted_rewards: List[Reward] = []
     cumulative_reward: Reward = Reward(0)
     for reward in reversed(trajectory):
         cumulative_reward = Reward(reward + gamma * cumulative_reward)
         discounted_rewards.append(cumulative_reward)
-    return RewardTrajectory(discounted_rewards[::-1])
+    return CumDiscFutureRewardTrajectory(discounted_rewards[::-1])
 
 
 def test_cumulative_discounted_future_rewards() -> None:
     # It's important to test our code, so we know it works as expected
     # We tried to use ipytest but it wasn't working https://github.com/chmp/ipytest
     assert cumulative_discounted_future_rewards(
-        trajectory=RewardTrajectory([-1]), gamma=0.5
-    ) == RewardTrajectory([-1])
+        trajectory=RewardTrajectory([Reward(-1)]), gamma=0.5
+    ) == RewardTrajectory([Reward(-1.0)])
     assert cumulative_discounted_future_rewards(
-        trajectory=RewardTrajectory([0]), gamma=0.5
-    ) == RewardTrajectory([0])
+        trajectory=RewardTrajectory([Reward(0)]), gamma=0.5
+    ) == RewardTrajectory([Reward(0.0)])
     assert cumulative_discounted_future_rewards(
-        trajectory=RewardTrajectory([0, 1]), gamma=0.5
-    ) == RewardTrajectory([0.5, 1])
+        trajectory=RewardTrajectory([Reward(0), Reward(1)]), gamma=0.5
+    ) == RewardTrajectory([Reward(0.5), Reward(1.0)])
     assert cumulative_discounted_future_rewards(
-        trajectory=RewardTrajectory([0, 1, 1]), gamma=0.5
-    ) == RewardTrajectory([0.75, 1.5, 1])
+        trajectory=RewardTrajectory([Reward(0), Reward(1), Reward(1)]), gamma=0.5
+    ) == RewardTrajectory([Reward(0.75), Reward(1.5), Reward(1.0)])
 
 
 if __name__ == "__main__":
@@ -320,9 +322,9 @@ def objective(*, policy: Policy, trajectory: Trajectory, gamma: float) -> Loss:
     """
     loss = []
     cum_disc_rewards = normalize(
-        cumulative_discounted_future_rewards(
+        cast(list[float], cumulative_discounted_future_rewards(
             trajectory=RewardTrajectory([sar.reward for sar in trajectory]), gamma=gamma
-        )
+        ))
     )
     for cum_disc_reward, sar in zip(cum_disc_rewards, trajectory):
         loss.append(cum_disc_reward * -sar.log_prob)  # This is negative to turn maximization into minimization
@@ -345,12 +347,12 @@ def objective(*, policy: Policy, trajectory: Trajectory, gamma: float) -> Loss:
 from tqdm.notebook import trange
 import torch.optim as optim
 
-def reinforce_train(*, env: Env, policy: Policy, optimizer: optim.Optimizer, gamma: float, num_episodes: int, max_t: int):
+def reinforce_train(*, env: Env, policy: Policy, optimizer: optim.Optimizer, gamma: float, num_episodes: int, max_t: int) -> list[float]:
     """Algorithm 1 REINFORCE"""
     assert gamma <= 1, "Gamma should be less than or equal to 1"
     assert gamma > 0, "Gamma should be greater than 0"
     assert num_episodes > 0, "Number of episodes should be greater than 0"
-    scores = []
+    scores: list[float] = []
     for _ in trange(num_episodes):
         # TODO: We could batch these episodes to get more stability
         trajectory = collect_episode(env=env, policy=policy, max_t=max_t)
@@ -386,14 +388,15 @@ class MockEnv(gym.Env):
         self.action_space = spaces.Discrete(2)
         self.observation_space = spaces.Discrete(1)
         self.max_steps = max_steps
-        self.reset()
+        self.state: npt.NDArray[np.float32] = np.array([random.choice([0.0, 1.0])])
+        self.steps = 0
 
     def step(self, action: Action) -> tuple[npt.NDArray[float32], Reward, bool, bool, dict]:
         assert self.action_space.contains(action), f"Invalid Action: {action}"
         
         # If the state is 0, then the 0th action is the correct action
         # If the state is 1, then the 1st action is the correct action
-        reward = 1 if action == self.state else -1
+        reward = Reward(1) if action == self.state else Reward(-1)
         self.steps += 1
         done = self.steps >= self.max_steps
         if done:
@@ -402,7 +405,7 @@ class MockEnv(gym.Env):
             self.state = np.array([random.choice([0.0, 1.0])])
             return self.state, reward, done, False, {}
         
-    def reset(self) -> tuple[npt.NDArray[float32], dict]:
+    def reset(self) -> tuple[npt.NDArray[float32], dict]:  # type: ignore[override]
         self.state = np.array([random.choice([0.0, 1.0])])
         self.steps = 0
         return self.state, {}  # Return the first observation
@@ -413,11 +416,11 @@ def test_mock_env_all_right() -> None:
     env = MockEnv(max_steps=max_steps)
     state, _ = env.reset()
     for _ in range(max_steps-1):
-        next_state, reward, done, _, _ = env.step(int(state[0]))
+        next_state, reward, done, _, _ = env.step(Action(int(state[0])))
         assert reward == 1
         assert done 
         state = next_state
-    next_state, reward, done, _, _ = env.step(int(state[0]))
+    next_state, reward, done, _, _ = env.step(Action(int(state[0])))
     assert reward == 1
     assert done
 
@@ -427,11 +430,11 @@ def test_mock_env_all_wrong() -> None:
     env = MockEnv(max_steps=max_steps)
     state, _ = env.reset()
     for _ in range(max_steps-1):
-        next_state, reward, done, _, _ = env.step(1-int(state[0]))
+        next_state, reward, done, _, _ = env.step(Action(1-int(state[0])))
         assert reward == -1
         assert done
         state = next_state
-    next_state, reward, done, _, _ = env.step(1-int(state[0]))
+    next_state, reward, done, _, _ = env.step(Action(1-int(state[0])))
     assert reward == -1
     assert done
 
@@ -537,7 +540,7 @@ class SamplePolicy(Policy):
 
 
 # %%
-def reinforce_train_batch(*, env: Env, policy: Policy, optimizer: optim.Optimizer, gamma: float, num_episodes: int, batch_size: int, max_t: int) -> None:
+def reinforce_train_batch(*, env: Env, policy: Policy, optimizer: optim.Optimizer, gamma: float, num_episodes: int, batch_size: int, max_t: int) -> list[float]:
     """Algorithm 1 REINFORCE modified to use batched episodes.
     equivalent to reinforce_train if batch_size=1
     """
@@ -552,7 +555,7 @@ def reinforce_train_batch(*, env: Env, policy: Policy, optimizer: optim.Optimize
             trajectory = collect_episode(env=env, policy=policy, max_t=max_t)
             _scores.append(sum([sar.reward for sar in trajectory]))
             policy_losses.append(objective(policy=policy, trajectory=trajectory, gamma=gamma))
-        policy_loss = torch.stack(policy_losses).mean()
+        policy_loss = torch.tensor(policy_losses).mean()
         scores.append(sum(_scores) / batch_size)
         optimizer.zero_grad()
         policy_loss.backward()  # This gives us the gradient

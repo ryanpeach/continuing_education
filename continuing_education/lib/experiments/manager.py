@@ -1,5 +1,6 @@
 from pathlib import Path
 from pprint import pformat
+from typing import Any
 import warnings
 from git import Repo
 import subprocess
@@ -25,7 +26,7 @@ class ExperimentManager:
             print("Running: ", " ".join(cmd))
             subprocess.run(cmd, check=True)
 
-    def commit(self, metrics: dict[str, float] | None = None):
+    def commit(self, metrics: dict[str, Any] | None = None):
         repo = Repo(path=self.file.absolute().parent, search_parent_directories=True)
         if metrics is None:
             metrics = {}
