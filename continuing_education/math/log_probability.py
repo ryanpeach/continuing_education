@@ -29,6 +29,7 @@
 import plotly.express as px
 import numpy as np
 
+
 def plot_logarithm() -> None:
     # Generating values from 0.01 to 1 (avoiding zero to prevent -inf in log calculation)
     x_values = np.linspace(0.001, 1, 400)
@@ -43,6 +44,7 @@ def plot_logarithm() -> None:
     )
     fig.update_xaxes(range=[0, 1])
     fig.show()
+
 
 if __name__ == "__main__":
     plot_logarithm()
@@ -63,6 +65,7 @@ if __name__ == "__main__":
 from sympy import symbols, log, Eq
 from sympy.simplify import simplify
 
+
 def logarithm_properties() -> None:
     # Define the symbols
     a, b = symbols("a b", positive=True, real=True)
@@ -81,6 +84,7 @@ def logarithm_properties() -> None:
     assert simplify_log_div == 0
     assert simplify_log_exp == 0
     print("All proposed logarithmic properties are correct!")
+
 
 if __name__ == "__main__":
     logarithm_properties()
@@ -122,5 +126,5 @@ if __name__ == "__main__":
 #
 # And 0 whenever $G_t$ is 0. Assuming that's the negative reward.
 #
-# What this tells us is that the loss function will get asymptotically closer to 0 as the probability of the action taken approaches 1. It will also explode into the positives as the probability of the action taken approaches 0. For positive rewards, this is good because it will push the probability of actions which lead to positive rewards towards 1. 
+# What this tells us is that the loss function will get asymptotically closer to 0 as the probability of the action taken approaches 1. It will also explode into the positives as the probability of the action taken approaches 0. For positive rewards, this is good because it will push the probability of actions which lead to positive rewards towards 1.
 #
