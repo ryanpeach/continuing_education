@@ -370,7 +370,6 @@ def reinforce_train(*, env: Env, policy: Policy, optimizer: optim.Optimizer, gam
 # First we want to unit test this on the simplest environment we can possibly think of, something that if it does not work it **guarenteed** to be a coding error. Something like "reward 1 if you repeat your input, 0 otherwise, end after 10 right answers."
 
 # %%
-import gym
 from gym import spaces
 import random
 
