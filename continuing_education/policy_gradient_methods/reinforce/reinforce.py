@@ -498,10 +498,8 @@ if __name__ == "__main__":
 # %% [markdown]
 # # Improvements
 #
-# 1. We should sample from actions instead of taking the argmax
-# 2. We should take a batch of episodes and optimize on the batch
-#
-# These should minimize the instability of the training process seen in the above graph, where it sometimes looses the gains it has made.
+# 1. We should sample from actions instead of taking the argmax. This should lead to better exploration which reduces as the model gets more confident.
+# 2. We should take a batch of episodes and optimize on the batch. This should lead to more stability in learning.
 
 # %%
 class SamplePolicy(Policy):
@@ -596,6 +594,9 @@ if __name__ == "__main__":
     ExperimentManager(name="REINFORCE", description=f"Batch Size {BATCH_SIZE} + Sample Results", primary_metric="last_10_percent_mean", file=__this_file).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
 
 # %% [markdown]
+# This worked well! Now I'm curious to see which improvement independently mattered the most, or if both worked together to improve the model.
+
+# %% [markdown]
 # ### Argmax, with batching
 
 # %%
@@ -665,7 +666,9 @@ if __name__ == "__main__":
     ExperimentManager(name="REINFORCE", description=f"Batch Size {BATCH_SIZE} + Sample Results", primary_metric="last_10_percent_mean", file=__this_file).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
 
 # %% [markdown]
-# ## Conclusion TODO
+# ## Conclusion
+#
+# REINFORCE seems to be rather unstable without some degree of batching, and without some degree of forced exploration, in this case done via sampling from the output distribution. It reliably learns the cartpole environment with a BATCH_SIZE of 10 and a sampling strategy. Doing one or the other or neither of Batching and sampling leads to very noisy results, which can lead to catestrophic forgetting. We will explore other strategies and algorithms in future notebooks.
 
 # %% [markdown]
 # # References
