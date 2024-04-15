@@ -19,6 +19,7 @@
 
 # %%
 from pathlib import Path
+
 if __name__ == "__main__":
     __this_file = Path().resolve() / "reinforce.ipynb"  # jupyter does not have __file__
 
@@ -47,10 +48,13 @@ if __name__ == "__main__":
 import gym
 from typing import cast
 
+
 def get_environment_space(env_name: str) -> tuple[tuple[int, ...], int]:
     env = gym.make(env_name)
     observation_space_shape = env.observation_space.shape
-    assert observation_space_shape is not None, "Observation space shape should not be None"
+    assert (
+        observation_space_shape is not None
+    ), "Observation space shape should not be None"
     action_space_size = env.action_space.n  # type: ignore[attr-defined]
     print("State size:", observation_space_shape)
     print("Action size:", action_space_size)
@@ -60,7 +64,8 @@ def get_environment_space(env_name: str) -> tuple[tuple[int, ...], int]:
     print(f"Action return: {action_return}")
     return observation_space_shape, cast(int, action_space_size)
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     OBSERVATION_SPACE_SHAPE, ACTION_SPACE_SIZE = get_environment_space("CartPole-v1")
 
 # %% [markdown]
@@ -117,12 +122,18 @@ class Policy(nn.Module):
 
         # Dimensions in the network are (batch_size, input_size, output_size)
         network: list[nn.Module] = []
-        network.append(nn.Linear(state_size, hidden_sizes[0]))  # Shape: (:, state_size, hidden_sizes[0])
+        network.append(
+            nn.Linear(state_size, hidden_sizes[0])
+        )  # Shape: (:, state_size, hidden_sizes[0])
         network.append(nn.ReLU())
         for i in range(len(hidden_sizes) - 1):
-            network.append(nn.Linear(hidden_sizes[i], hidden_sizes[i + 1]))  # Shape: (:, hidden_sizes[i], hidden_sizes[i+1])
+            network.append(
+                nn.Linear(hidden_sizes[i], hidden_sizes[i + 1])
+            )  # Shape: (:, hidden_sizes[i], hidden_sizes[i+1])
             network.append(nn.ReLU())
-        network.append(nn.Linear(hidden_sizes[-1], action_size))  # Shape: (:, hidden_sizes[-1], action_size)
+        network.append(
+            nn.Linear(hidden_sizes[-1], action_size)
+        )  # Shape: (:, hidden_sizes[-1], action_size)
         network.append(nn.Softmax(dim=-1))  # Softmax along the action dimension
         self.network = nn.Sequential(*network).to(DEVICE)
 
@@ -130,7 +141,7 @@ class Policy(nn.Module):
         """Takes a state tensor and returns a probability distribution along the action space"""
         state = state.to(DEVICE)
         return self.network(state)
-    
+
     def act(self, state: State) -> Tuple[Action, LogProb]:
         """Same as forward, instead of returning the entire distribution, we
         return the maximum probability action
@@ -142,8 +153,12 @@ class Policy(nn.Module):
         # Now we can run the forward pass, whos output is a probability distribution
         # along the action space
         pdf = self.forward(state_tensor)
-        assert torch.isclose(pdf.sum().cpu(), torch.Tensor([1.0])).all(), "The output of the network should be a probability distribution"
-        assert pdf.cpu().shape[-1] == self.action_size, "The output of the network should be a probability distribution over the action space"
+        assert torch.isclose(
+            pdf.sum().cpu(), torch.Tensor([1.0])
+        ).all(), "The output of the network should be a probability distribution"
+        assert (
+            pdf.cpu().shape[-1] == self.action_size
+        ), "The output of the network should be a probability distribution over the action space"
 
         # Now we want to get the action that corresponds to the highest probability
         # TODO: We could sample from the pdf instead of taking the greedy argmax
@@ -195,6 +210,7 @@ RewardTrajectory = NewType("RewardTrajectory", List[Reward])
 # %% [markdown]
 # And here is a nice helper function I found in the hugging face tutorial for normalization in pytorch.
 
+
 # %%
 def normalize(returns: Tensor | list[float] | npt.NDArray[np.float32]) -> Tensor:
     """
@@ -202,7 +218,7 @@ def normalize(returns: Tensor | list[float] | npt.NDArray[np.float32]) -> Tensor
     Handles floating point errors by adding a small epsilon to the denominator to avoid division by zero.
 
     $\frac{x - E[x]}_{std(x) + eps}$
-    
+
     Ripped off from huggingface https://huggingface.co/learn/deep-rl-course/unit4/hands-on
     """
     ## standardization of the returns is employed to make training more stable
@@ -225,13 +241,14 @@ def normalize(returns: Tensor | list[float] | npt.NDArray[np.float32]) -> Tensor
 # %%
 from gym import Env
 
+
 def collect_episode(*, env: Env, policy: Policy, max_t: int = 1000) -> Trajectory:
     """2.1 Returns the trajectory of one episode of using the policy.
-    
+
     The output is a list of SAR tuples, where each tuple represents a state, action, reward tuple.
 
     In the hugging face tutorial this is represented as:
-    
+
     $S_0, A_0, r_0, ..., S_{T-1}, A_{T-1}, r_{T-1}$
     """
     state, _ = env.reset()
@@ -265,11 +282,12 @@ def collect_episode(*, env: Env, policy: Policy, max_t: int = 1000) -> Trajector
 # in the corresponding reward trajectory
 CumDiscFutureRewardTrajectory = NewType("CumDiscFutureRewardTrajectory", list[Reward])
 
+
 def cumulative_discounted_future_rewards(
     *, trajectory: RewardTrajectory, gamma: float
 ) -> CumDiscFutureRewardTrajectory:
     """2.2.1 Returns the cumulative discounted future rewards of a trajectory at each step of the trajectory.
-    
+
     In the hugging face tutorial,
     each element in the output is represented by $G_t$ where $t$ is the index of the element."""
     if len(trajectory) == 0:
@@ -312,6 +330,7 @@ if __name__ == "__main__":
 #
 # $J(\theta) = \frac{1}{T} \sum_{t=0}^{T-1} G_t \log \pi_{\theta}(a_t | s_t)$
 
+
 # %%
 def objective(*, policy: Policy, trajectory: Trajectory, gamma: float) -> Loss:
     """
@@ -322,12 +341,18 @@ def objective(*, policy: Policy, trajectory: Trajectory, gamma: float) -> Loss:
     """
     loss = []
     cum_disc_rewards = normalize(
-        cast(list[float], cumulative_discounted_future_rewards(
-            trajectory=RewardTrajectory([sar.reward for sar in trajectory]), gamma=gamma
-        ))
+        cast(
+            list[float],
+            cumulative_discounted_future_rewards(
+                trajectory=RewardTrajectory([sar.reward for sar in trajectory]),
+                gamma=gamma,
+            ),
+        )
     )
     for cum_disc_reward, sar in zip(cum_disc_rewards, trajectory):
-        loss.append(cum_disc_reward * -sar.log_prob)  # This is negative to turn maximization into minimization
+        loss.append(
+            cum_disc_reward * -sar.log_prob
+        )  # This is negative to turn maximization into minimization
     return Loss(torch.cat(loss).sum())
 
 
@@ -347,7 +372,16 @@ def objective(*, policy: Policy, trajectory: Trajectory, gamma: float) -> Loss:
 from tqdm.notebook import trange
 import torch.optim as optim
 
-def reinforce_train(*, env: Env, policy: Policy, optimizer: optim.Optimizer, gamma: float, num_episodes: int, max_t: int) -> list[float]:
+
+def reinforce_train(
+    *,
+    env: Env,
+    policy: Policy,
+    optimizer: optim.Optimizer,
+    gamma: float,
+    num_episodes: int,
+    max_t: int,
+) -> list[float]:
     """Algorithm 1 REINFORCE"""
     assert gamma <= 1, "Gamma should be less than or equal to 1"
     assert gamma > 0, "Gamma should be greater than 0"
@@ -364,7 +398,6 @@ def reinforce_train(*, env: Env, policy: Policy, optimizer: optim.Optimizer, gam
     return scores
 
 
-
 # %% [markdown]
 # ## Unit Testing NN's and Training Functions
 #
@@ -377,11 +410,13 @@ import random
 
 from numpy import float32
 
+
 class MockEnv(gym.Env):
     """A dead simple environment for reinforcement learning that rewards the agent for going left.
     Useful for unit testing.
     """
-    metadata = {'render.modes': ['human']}
+
+    metadata = {"render.modes": ["human"]}
 
     def __init__(self, max_steps=10):
         super().__init__()
@@ -391,9 +426,11 @@ class MockEnv(gym.Env):
         self.state: npt.NDArray[np.float32] = np.array([random.choice([0.0, 1.0])])
         self.steps = 0
 
-    def step(self, action: Action) -> tuple[npt.NDArray[float32], Reward, bool, bool, dict]:
+    def step(
+        self, action: Action
+    ) -> tuple[npt.NDArray[float32], Reward, bool, bool, dict]:
         assert self.action_space.contains(action), f"Invalid Action: {action}"
-        
+
         # If the state is 0, then the 0th action is the correct action
         # If the state is 1, then the 1st action is the correct action
         reward = Reward(1) if action == self.state else Reward(-1)
@@ -404,39 +441,42 @@ class MockEnv(gym.Env):
         else:
             self.state = np.array([random.choice([0.0, 1.0])])
             return self.state, reward, done, False, {}
-        
+
     def reset(self) -> tuple[npt.NDArray[float32], dict]:  # type: ignore[override]
         self.state = np.array([random.choice([0.0, 1.0])])
         self.steps = 0
         return self.state, {}  # Return the first observation
+
 
 def test_mock_env_all_right() -> None:
     """Manually check the behavior of the mock environment. Perform all actions correctly."""
     max_steps = 10
     env = MockEnv(max_steps=max_steps)
     state, _ = env.reset()
-    for _ in range(max_steps-1):
+    for _ in range(max_steps - 1):
         next_state, reward, done, _, _ = env.step(Action(int(state[0])))
         assert reward == 1
-        assert done 
+        assert done
         state = next_state
     next_state, reward, done, _, _ = env.step(Action(int(state[0])))
     assert reward == 1
     assert done
+
 
 def test_mock_env_all_wrong() -> None:
     """Manually check the behavior of the mock environment. Perform all actions incorrectly."""
     max_steps = 10
     env = MockEnv(max_steps=max_steps)
     state, _ = env.reset()
-    for _ in range(max_steps-1):
-        next_state, reward, done, _, _ = env.step(Action(1-int(state[0])))
+    for _ in range(max_steps - 1):
+        next_state, reward, done, _, _ = env.step(Action(1 - int(state[0])))
         assert reward == -1
         assert done
         state = next_state
-    next_state, reward, done, _, _ = env.step(Action(1-int(state[0])))
+    next_state, reward, done, _, _ = env.step(Action(1 - int(state[0])))
     assert reward == -1
     assert done
+
 
 if __name__ == "__main__":
     test_mock_env_all_right()
@@ -451,8 +491,18 @@ def test_reinforce_train() -> None:
     env = MockEnv(max_steps=10)
     policy = Policy(state_size=1, action_size=2, hidden_sizes=[16])
     optimizer = optim.Adam(policy.parameters(), lr=1e-2)
-    scores = reinforce_train(env=env, policy=policy, optimizer=optimizer, gamma=1.0, num_episodes=100, max_t=10)
-    assert all([score == 10 for score in scores[90:]]), "The last 10 scores should be 10"
+    scores = reinforce_train(
+        env=env,
+        policy=policy,
+        optimizer=optimizer,
+        gamma=1.0,
+        num_episodes=100,
+        max_t=10,
+    )
+    assert all(
+        [score == 10 for score in scores[90:]]
+    ), "The last 10 scores should be 10"
+
 
 if __name__ == "__main__":
     test_reinforce_train()
@@ -475,9 +525,9 @@ from continuing_education.lib.experiments import ExperimentManager
 
 if __name__ == "__main__":
     LR = 1e-2
-    GAMMA = 1.0 # Cartpole benefits from a high gamma because the longer the pole is up, the higher the reward
+    GAMMA = 1.0  # Cartpole benefits from a high gamma because the longer the pole is up, the higher the reward
     HIDDEN_SIZES = [16, 16]
-    NUM_EPISODES= 10000
+    NUM_EPISODES = 10000
     MAX_T = 100
     # Do this a few times to prove consistency
     last_10_percent_mean = []
@@ -489,12 +539,26 @@ if __name__ == "__main__":
             hidden_sizes=HIDDEN_SIZES,
         ).to(DEVICE)
         optimizer = optim.Adam(policy.parameters(), lr=LR)
-        scores = reinforce_train(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES, max_t=MAX_T)
+        scores = reinforce_train(
+            env=env,
+            policy=policy,
+            optimizer=optimizer,
+            gamma=GAMMA,
+            num_episodes=NUM_EPISODES,
+            max_t=MAX_T,
+        )
         # Calculate the mean of the last 10 % of the scores
-        last_10_percent_mean.append(sum(scores[int(NUM_EPISODES*0.9):]) / (NUM_EPISODES*0.1))
+        last_10_percent_mean.append(
+            sum(scores[int(NUM_EPISODES * 0.9) :]) / (NUM_EPISODES * 0.1)
+        )
         fig = px.line(scores, title="Scores over time")
         fig.show()
-    ExperimentManager(name="REINFORCE", description="Main Results", primary_metric="last_10_percent_mean", file=__this_file).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
+    ExperimentManager(
+        name="REINFORCE",
+        description="Main Results",
+        primary_metric="last_10_percent_mean",
+        file=__this_file,
+    ).commit(metrics={"last_10_percent_mean": last_10_percent_mean})
 
 
 # %% [markdown]
@@ -502,6 +566,7 @@ if __name__ == "__main__":
 #
 # 1. We should sample from actions instead of taking the argmax. This should lead to better exploration which reduces as the model gets more confident.
 # 2. We should take a batch of episodes and optimize on the batch. This should lead to more stability in learning.
+
 
 # %%
 class SamplePolicy(Policy):
@@ -521,8 +586,12 @@ class SamplePolicy(Policy):
         # Now we can run the forward pass, whos output is a probability distribution
         # along the action space
         pdf = self.forward(state_tensor)
-        assert torch.isclose(pdf.sum().cpu(), torch.Tensor([1.0])).all(), "The output of the network should be a probability distribution"
-        assert pdf.cpu().shape[-1] == self.action_size, "The output of the network should be a probability distribution over the action space"
+        assert torch.isclose(
+            pdf.sum().cpu(), torch.Tensor([1.0])
+        ).all(), "The output of the network should be a probability distribution"
+        assert (
+            pdf.cpu().shape[-1] == self.action_size
+        ), "The output of the network should be a probability distribution over the action space"
 
         # Now we want to get the action that corresponds to the highest probability
         # TODO: We could sample from the pdf instead of taking the greedy argmax
@@ -540,7 +609,16 @@ class SamplePolicy(Policy):
 
 
 # %%
-def reinforce_train_batch(*, env: Env, policy: Policy, optimizer: optim.Optimizer, gamma: float, num_episodes: int, batch_size: int, max_t: int) -> list[float]:
+def reinforce_train_batch(
+    *,
+    env: Env,
+    policy: Policy,
+    optimizer: optim.Optimizer,
+    gamma: float,
+    num_episodes: int,
+    batch_size: int,
+    max_t: int,
+) -> list[float]:
     """Algorithm 1 REINFORCE modified to use batched episodes.
     equivalent to reinforce_train if batch_size=1
     """
@@ -554,7 +632,9 @@ def reinforce_train_batch(*, env: Env, policy: Policy, optimizer: optim.Optimize
         for _ in range(batch_size):
             trajectory = collect_episode(env=env, policy=policy, max_t=max_t)
             _scores.append(sum([sar.reward for sar in trajectory]))
-            policy_losses.append(objective(policy=policy, trajectory=trajectory, gamma=gamma))
+            policy_losses.append(
+                objective(policy=policy, trajectory=trajectory, gamma=gamma)
+            )
         policy_loss = torch.tensor(policy_losses).mean()
         scores.append(sum(_scores) / batch_size)
         optimizer.zero_grad()
@@ -562,13 +642,25 @@ def reinforce_train_batch(*, env: Env, policy: Policy, optimizer: optim.Optimize
         optimizer.step()
     return scores
 
+
 def test_reinforce_train_batch() -> None:
     """Test the reinforce training loop on the mock environment."""
     env = MockEnv(max_steps=10)
     policy = SamplePolicy(state_size=1, action_size=2, hidden_sizes=[16])
     optimizer = optim.Adam(policy.parameters(), lr=1e-2)
-    scores = reinforce_train_batch(env=env, policy=policy, optimizer=optimizer, gamma=1.0, num_episodes=100, batch_size=10, max_t=10)
-    assert all([score >= 9 for score in scores[90:]]), f"The last 10 scores should be 10, maybe some 9s. Got: {scores}"
+    scores = reinforce_train_batch(
+        env=env,
+        policy=policy,
+        optimizer=optimizer,
+        gamma=1.0,
+        num_episodes=100,
+        batch_size=10,
+        max_t=10,
+    )
+    assert all(
+        [score >= 9 for score in scores[90:]]
+    ), f"The last 10 scores should be 10, maybe some 9s. Got: {scores}"
+
 
 if __name__ == "__main__":
     test_reinforce_train_batch()
@@ -588,12 +680,27 @@ if __name__ == "__main__":
             hidden_sizes=HIDDEN_SIZES,
         ).to(DEVICE)
         optimizer = optim.Adam(policy.parameters(), lr=LR)
-        scores = reinforce_train_batch(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES, batch_size=BATCH_SIZE, max_t=MAX_T)
+        scores = reinforce_train_batch(
+            env=env,
+            policy=policy,
+            optimizer=optimizer,
+            gamma=GAMMA,
+            num_episodes=NUM_EPISODES,
+            batch_size=BATCH_SIZE,
+            max_t=MAX_T,
+        )
         # Calculate the mean of the last 10 % of the scores
-        last_10_percent_mean.append(sum(scores[int(NUM_EPISODES*0.9):]) / (NUM_EPISODES*0.1))
+        last_10_percent_mean.append(
+            sum(scores[int(NUM_EPISODES * 0.9) :]) / (NUM_EPISODES * 0.1)
+        )
         fig = px.line(scores, title="Scores over time")
         fig.show()
-    ExperimentManager(name="REINFORCE", description=f"Batch Size {BATCH_SIZE} + Sample Results", primary_metric="last_10_percent_mean", file=__this_file).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
+    ExperimentManager(
+        name="REINFORCE",
+        description=f"Batch Size {BATCH_SIZE} + Sample Results",
+        primary_metric="last_10_percent_mean",
+        file=__this_file,
+    ).commit(metrics={"last_10_percent_mean": last_10_percent_mean})
 
 # %% [markdown]
 # This worked well! Now I'm curious to see which improvement independently mattered the most, or if both worked together to improve the model.
@@ -614,12 +721,27 @@ if __name__ == "__main__":
             hidden_sizes=HIDDEN_SIZES,
         ).to(DEVICE)
         optimizer = optim.Adam(policy.parameters(), lr=LR)
-        scores = reinforce_train_batch(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES, batch_size=BATCH_SIZE, max_t=MAX_T)
+        scores = reinforce_train_batch(
+            env=env,
+            policy=policy,
+            optimizer=optimizer,
+            gamma=GAMMA,
+            num_episodes=NUM_EPISODES,
+            batch_size=BATCH_SIZE,
+            max_t=MAX_T,
+        )
         # Calculate the mean of the last 10 % of the scores
-        last_10_percent_mean.append(sum(scores[int(NUM_EPISODES*0.9):]) / (NUM_EPISODES*0.1))
+        last_10_percent_mean.append(
+            sum(scores[int(NUM_EPISODES * 0.9) :]) / (NUM_EPISODES * 0.1)
+        )
         fig = px.line(scores, title="Scores over time")
         fig.show()
-    ExperimentManager(name="REINFORCE", description=f"Batch Size {BATCH_SIZE} + Argmax Results", primary_metric="last_10_percent_mean", file=__this_file).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
+    ExperimentManager(
+        name="REINFORCE",
+        description=f"Batch Size {BATCH_SIZE} + Argmax Results",
+        primary_metric="last_10_percent_mean",
+        file=__this_file,
+    ).commit(metrics={"last_10_percent_mean": last_10_percent_mean})
 
 # %% [markdown]
 # ### Sampling, no batching
@@ -637,12 +759,26 @@ if __name__ == "__main__":
             hidden_sizes=HIDDEN_SIZES,
         ).to(DEVICE)
         optimizer = optim.Adam(policy.parameters(), lr=LR)
-        scores = reinforce_train(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES, max_t=MAX_T)
+        scores = reinforce_train(
+            env=env,
+            policy=policy,
+            optimizer=optimizer,
+            gamma=GAMMA,
+            num_episodes=NUM_EPISODES,
+            max_t=MAX_T,
+        )
         # Calculate the mean of the last 10 % of the scores
-        last_10_percent_mean.append(sum(scores[int(NUM_EPISODES*0.9):]) / (NUM_EPISODES*0.1))
+        last_10_percent_mean.append(
+            sum(scores[int(NUM_EPISODES * 0.9) :]) / (NUM_EPISODES * 0.1)
+        )
         fig = px.line(scores, title="Scores over time")
         fig.show()
-    ExperimentManager(name="REINFORCE", description=f"Batch Size {BATCH_SIZE} + Sample Results", primary_metric="last_10_percent_mean", file=__this_file).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
+    ExperimentManager(
+        name="REINFORCE",
+        description=f"Batch Size {BATCH_SIZE} + Sample Results",
+        primary_metric="last_10_percent_mean",
+        file=__this_file,
+    ).commit(metrics={"last_10_percent_mean": last_10_percent_mean})
 
 # %% [markdown]
 # ### Both, but with smaller batch size
@@ -660,12 +796,27 @@ if __name__ == "__main__":
             hidden_sizes=HIDDEN_SIZES,
         ).to(DEVICE)
         optimizer = optim.Adam(policy.parameters(), lr=LR)
-        scores = reinforce_train_batch(env=env, policy=policy, optimizer=optimizer, gamma=GAMMA, num_episodes=NUM_EPISODES, batch_size=BATCH_SIZE, max_t=MAX_T)
+        scores = reinforce_train_batch(
+            env=env,
+            policy=policy,
+            optimizer=optimizer,
+            gamma=GAMMA,
+            num_episodes=NUM_EPISODES,
+            batch_size=BATCH_SIZE,
+            max_t=MAX_T,
+        )
         # Calculate the mean of the last 10 % of the scores
-        last_10_percent_mean.append(sum(scores[int(NUM_EPISODES*0.9):]) / (NUM_EPISODES*0.1))
+        last_10_percent_mean.append(
+            sum(scores[int(NUM_EPISODES * 0.9) :]) / (NUM_EPISODES * 0.1)
+        )
         fig = px.line(scores, title="Scores over time")
         fig.show()
-    ExperimentManager(name="REINFORCE", description=f"Batch Size {BATCH_SIZE} + Sample Results", primary_metric="last_10_percent_mean", file=__this_file).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
+    ExperimentManager(
+        name="REINFORCE",
+        description=f"Batch Size {BATCH_SIZE} + Sample Results",
+        primary_metric="last_10_percent_mean",
+        file=__this_file,
+    ).commit(metrics={"last_10_percent_mean": last_10_percent_mean})
 
 # %% [markdown]
 # ## Conclusion
