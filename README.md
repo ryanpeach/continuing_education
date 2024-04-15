@@ -8,21 +8,28 @@ Some projects I'm using to learn AI since my MS
     * [X] Value Based Methods - It's not implemented here, but from my MS I feel I'm already an "expert" in Q-Learning up to and including RAINBOW.
     * Policy Based Methods
         * [X] REINFORCE
-        * [ ] Actor-Critic 2
+        * [ ] Actor-Critic
         * [ ] Proximal Policy Optimization (PPO)
-        * [ ] RLHF
     * Model Based Reinforcement Learning
-        * [ ] AlphaGo Zero
+        * [ ] AlphaZero
     * [ ] Exploration in RL
     * [ ] Multi Agent RL
 * Transformers
     * [ ] Tokenization
     * [ ] Word Embeddings
     * [ ] Transformers
+    * [ ] Fine Tuning
+    * [ ] RLHF
     * [ ] Self Implemented LLM
     * [ ] Multimodality
 * [ ] Diffusion Models
 * [ ] Graph Neural Networks (GNN)
+* Techniques
+    * Distribution
+        * [ ] pytorch.distributed
+        * [ ] rllib
+    * Profiling
+    * Debugging Metrics
 
 ## Sources for further work
 
