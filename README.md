@@ -11,7 +11,8 @@ Some projects I'm using to learn AI since my MS
         * [ ] Actor-Critic 2
         * [ ] Proximal Policy Optimization (PPO)
         * [ ] RLHF
-    * [ ] Model Based Reinforcement Learning
+    * Model Based Reinforcement Learning
+        * [ ] AlphaGo Zero
     * [ ] Exploration in RL
     * [ ] Multi Agent RL
 * Transformers
