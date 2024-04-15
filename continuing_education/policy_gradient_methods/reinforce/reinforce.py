@@ -415,11 +415,11 @@ def test_mock_env_all_right() -> None:
     for _ in range(max_steps-1):
         next_state, reward, done, _, _ = env.step(int(state[0]))
         assert reward == 1
-        assert done == False
+        assert done 
         state = next_state
     next_state, reward, done, _, _ = env.step(int(state[0]))
     assert reward == 1
-    assert done == True
+    assert done
 
 def test_mock_env_all_wrong() -> None:
     """Manually check the behavior of the mock environment. Perform all actions incorrectly."""
@@ -429,11 +429,11 @@ def test_mock_env_all_wrong() -> None:
     for _ in range(max_steps-1):
         next_state, reward, done, _, _ = env.step(1-int(state[0]))
         assert reward == -1
-        assert done == False
+        assert done
         state = next_state
     next_state, reward, done, _, _ = env.step(1-int(state[0]))
     assert reward == -1
-    assert done == True
+    assert done
 
 if __name__ == "__main__":
     test_mock_env_all_right()
