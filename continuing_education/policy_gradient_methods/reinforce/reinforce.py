@@ -596,11 +596,6 @@ if __name__ == "__main__":
     ExperimentManager(name="REINFORCE", description=f"Batch Size {BATCH_SIZE} + Sample Results", primary_metric="last_10_percent_mean", file=__this_file).commit(metrics={"last_10_percent_mean": last_10_percent_mean})    
 
 # %% [markdown]
-# Out of three runs:
-#
-# 1. Did very well and achieved the maximum score `git_commit:a3ccdfdd4b2dcd079f09cb9fffa1adfff47696d8`
-# 2. 
-#
 # ### Argmax, with batching
 
 # %%
