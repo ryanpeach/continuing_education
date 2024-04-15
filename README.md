@@ -13,6 +13,7 @@ Some projects I'm using to learn AI since my MS
         * [ ] RLHF
     * [ ] Model Based Reinforcement Learning
     * [ ] Exploration in RL
+    * [ ] Multi Agent RL
 * Transformers
     * [ ] Tokenization
     * [ ] Word Embeddings
