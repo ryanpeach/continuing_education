@@ -1,5 +1,4 @@
 from pathlib import Path
-import os
 from pprint import pformat
 import warnings
 from git import Repo
