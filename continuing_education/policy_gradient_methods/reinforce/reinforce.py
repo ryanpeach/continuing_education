@@ -456,7 +456,7 @@ def test_mock_env_all_right() -> None:
     for _ in range(max_steps - 1):
         next_state, reward, done, _, _ = env.step(Action(int(state[0])))
         assert reward == 1
-        assert done
+        assert not done
         state = next_state
     next_state, reward, done, _, _ = env.step(Action(int(state[0])))
     assert reward == 1
@@ -471,7 +471,7 @@ def test_mock_env_all_wrong() -> None:
     for _ in range(max_steps - 1):
         next_state, reward, done, _, _ = env.step(Action(1 - int(state[0])))
         assert reward == -1
-        assert done
+        assert not done
         state = next_state
     next_state, reward, done, _, _ = env.step(Action(1 - int(state[0])))
     assert reward == -1
