@@ -101,6 +101,9 @@ Loss = NewType("Loss", Tensor)
 from typing import List, Tuple
 from torch import nn
 
+def softmax_with_temperature(logits: Tensor, *, temperature: float = 1.0, dim: int = -1) -> Tensor:
+    """Softmax with temperature"""
+    return torch.exp(logits / temperature) / torch.exp(logits / temperature).sum(dim=dim)
 
 class Policy(nn.Module):
     """A classic policy network is one which takes in a state
@@ -134,25 +137,26 @@ class Policy(nn.Module):
         network.append(
             nn.Linear(hidden_sizes[-1], action_size)
         )  # Shape: (:, hidden_sizes[-1], action_size)
-        network.append(nn.Softmax(dim=-1))  # Softmax along the action dimension
         self.network = nn.Sequential(*network).to(DEVICE)
 
     def forward(self, state: torch.Tensor) -> torch.Tensor:
-        """Takes a state tensor and returns a probability distribution along the action space"""
+        """Takes a state tensor and returns logits along the action space"""
         state = state.to(DEVICE)
         return self.network(state)
 
-    def act(self, state: State) -> Tuple[Action, LogProb]:
+    def act(self, state: State, *, temperature: float) -> Tuple[Action, LogProb]:
         """Same as forward, instead of returning the entire distribution, we
         return the maximum probability action
         along with the log probability of that action
+        temperature is only here for forward compatibility with other policies
+        it wont affect output since we use argmax.
         """
         # First we got to convert out of numpy and into pytorch
         state_tensor = torch.from_numpy(state).float().unsqueeze(0)
 
         # Now we can run the forward pass, whos output is a probability distribution
         # along the action space
-        pdf = self.forward(state_tensor)
+        pdf = softmax_with_temperature(self.forward(state_tensor), temperature=temperature)
         assert torch.isclose(
             pdf.sum().cpu(), torch.Tensor([1.0])
         ).all(), "The output of the network should be a probability distribution"
@@ -242,7 +246,7 @@ def normalize(returns: Tensor | list[float] | npt.NDArray[np.float32]) -> Tensor
 from gym import Env
 
 
-def collect_episode(*, env: Env, policy: Policy, max_t: int = 1000) -> Trajectory:
+def collect_episode(*, env: Env, policy: Policy, max_t: int = 1000, temperature: float = 1.0) -> Trajectory:
     """2.1 Returns the trajectory of one episode of using the policy.
 
     The output is a list of SAR tuples, where each tuple represents a state, action, reward tuple.
@@ -255,7 +259,7 @@ def collect_episode(*, env: Env, policy: Policy, max_t: int = 1000) -> Trajector
     done = False
     trajectory = []
     for _ in range(max_t):
-        action, log_prob = policy.act(state)
+        action, log_prob = policy.act(state, temperature=temperature)
         next_state, reward, done, _, _ = env.step(action)
         trajectory.append(
             SAR(
@@ -389,7 +393,7 @@ def reinforce_train(
     scores: list[float] = []
     for _ in trange(num_episodes):
         # TODO: We could batch these episodes to get more stability
-        trajectory = collect_episode(env=env, policy=policy, max_t=max_t)
+        trajectory = collect_episode(env=env, policy=policy, max_t=max_t, temperature=1.0)
         scores.append(sum([sar.reward for sar in trajectory]))
         policy_loss = objective(policy=policy, trajectory=trajectory, gamma=gamma)
         optimizer.zero_grad()
@@ -574,7 +578,7 @@ class SamplePolicy(Policy):
     and returns a probability distribution over the action space.
     Act samples from the distribution instead of taking the greedy argmax."""
 
-    def act(self, state: State) -> Tuple[Action, LogProb]:
+    def act(self, state: State, *, temperature: float) -> Tuple[Action, LogProb]:
         """Same as forward, instead of returning the entire distribution, we
         sample from the distribution
         along with the log probability of that action.
@@ -585,7 +589,7 @@ class SamplePolicy(Policy):
 
         # Now we can run the forward pass, whos output is a probability distribution
         # along the action space
-        pdf = self.forward(state_tensor)
+        pdf = softmax_with_temperature(self.forward(state_tensor), temperature=temperature)
         assert torch.isclose(
             pdf.sum().cpu(), torch.Tensor([1.0])
         ).all(), "The output of the network should be a probability distribution"
@@ -618,6 +622,7 @@ def reinforce_train_batch(
     num_episodes: int,
     batch_size: int,
     max_t: int,
+    temperature: float,
 ) -> list[float]:
     """Algorithm 1 REINFORCE modified to use batched episodes.
     equivalent to reinforce_train if batch_size=1
@@ -630,7 +635,7 @@ def reinforce_train_batch(
         policy_losses = []
         _scores = []
         for _ in range(batch_size):
-            trajectory = collect_episode(env=env, policy=policy, max_t=max_t)
+            trajectory = collect_episode(env=env, policy=policy, max_t=max_t, temperature=temperature)
             _scores.append(sum([sar.reward for sar in trajectory]))
             policy_losses.append(
                 objective(policy=policy, trajectory=trajectory, gamma=gamma)
@@ -656,6 +661,7 @@ def test_reinforce_train_batch() -> None:
         num_episodes=100,
         batch_size=10,
         max_t=10,
+        temperature=1.0,
     )
     assert all(
         [score >= 9 for score in scores[90:]]
@@ -688,6 +694,7 @@ if __name__ == "__main__":
             num_episodes=NUM_EPISODES,
             batch_size=BATCH_SIZE,
             max_t=MAX_T,
+            temperature=1.0,
         )
         # Calculate the mean of the last 10 % of the scores
         last_10_percent_mean.append(
@@ -729,6 +736,7 @@ if __name__ == "__main__":
             num_episodes=NUM_EPISODES,
             batch_size=BATCH_SIZE,
             max_t=MAX_T,
+            temperature=1.0,
         )
         # Calculate the mean of the last 10 % of the scores
         last_10_percent_mean.append(
@@ -804,6 +812,7 @@ if __name__ == "__main__":
             num_episodes=NUM_EPISODES,
             batch_size=BATCH_SIZE,
             max_t=MAX_T,
+            temperature=1.0,
         )
         # Calculate the mean of the last 10 % of the scores
         last_10_percent_mean.append(
