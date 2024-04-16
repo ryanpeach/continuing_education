@@ -101,9 +101,15 @@ Loss = NewType("Loss", Tensor)
 from typing import List, Tuple
 from torch import nn
 
-def softmax_with_temperature(logits: Tensor, *, temperature: float = 1.0, dim: int = -1) -> Tensor:
+
+def softmax_with_temperature(
+    logits: Tensor, *, temperature: float = 1.0, dim: int = -1
+) -> Tensor:
     """Softmax with temperature"""
-    return torch.exp(logits / temperature) / torch.exp(logits / temperature).sum(dim=dim)
+    return torch.exp(logits / temperature) / torch.exp(logits / temperature).sum(
+        dim=dim
+    )
+
 
 class Policy(nn.Module):
     """A classic policy network is one which takes in a state
@@ -156,7 +162,9 @@ class Policy(nn.Module):
 
         # Now we can run the forward pass, whos output is a probability distribution
         # along the action space
-        pdf = softmax_with_temperature(self.forward(state_tensor), temperature=temperature)
+        pdf = softmax_with_temperature(
+            self.forward(state_tensor), temperature=temperature
+        )
         assert torch.isclose(
             pdf.sum().cpu(), torch.Tensor([1.0])
         ).all(), "The output of the network should be a probability distribution"
@@ -246,7 +254,9 @@ def normalize(returns: Tensor | list[float] | npt.NDArray[np.float32]) -> Tensor
 from gym import Env
 
 
-def collect_episode(*, env: Env, policy: Policy, max_t: int = 1000, temperature: float = 1.0) -> Trajectory:
+def collect_episode(
+    *, env: Env, policy: Policy, max_t: int = 1000, temperature: float = 1.0
+) -> Trajectory:
     """2.1 Returns the trajectory of one episode of using the policy.
 
     The output is a list of SAR tuples, where each tuple represents a state, action, reward tuple.
@@ -393,7 +403,9 @@ def reinforce_train(
     scores: list[float] = []
     for _ in trange(num_episodes):
         # TODO: We could batch these episodes to get more stability
-        trajectory = collect_episode(env=env, policy=policy, max_t=max_t, temperature=1.0)
+        trajectory = collect_episode(
+            env=env, policy=policy, max_t=max_t, temperature=1.0
+        )
         scores.append(sum([sar.reward for sar in trajectory]))
         policy_loss = objective(policy=policy, trajectory=trajectory, gamma=gamma)
         optimizer.zero_grad()
@@ -427,7 +439,7 @@ class MockEnv(gym.Env):
         self.action_space = spaces.Discrete(2)
         self.observation_space = spaces.Discrete(1)
         self.max_steps = max_steps
-        self.state: npt.NDArray[np.float32] = np.array([random.choice([0.0, 1.0])])
+        self.state: npt.NDArray[np.float32] = np.array([random.choice([0.0, 1.0])])  # type: ignore[annotation-unchecked]
         self.steps = 0
 
     def step(
@@ -589,7 +601,9 @@ class SamplePolicy(Policy):
 
         # Now we can run the forward pass, whos output is a probability distribution
         # along the action space
-        pdf = softmax_with_temperature(self.forward(state_tensor), temperature=temperature)
+        pdf = softmax_with_temperature(
+            self.forward(state_tensor), temperature=temperature
+        )
         assert torch.isclose(
             pdf.sum().cpu(), torch.Tensor([1.0])
         ).all(), "The output of the network should be a probability distribution"
@@ -635,12 +649,14 @@ def reinforce_train_batch(
         policy_losses = []
         _scores = []
         for _ in range(batch_size):
-            trajectory = collect_episode(env=env, policy=policy, max_t=max_t, temperature=temperature)
+            trajectory = collect_episode(
+                env=env, policy=policy, max_t=max_t, temperature=temperature
+            )
             _scores.append(sum([sar.reward for sar in trajectory]))
             policy_losses.append(
                 objective(policy=policy, trajectory=trajectory, gamma=gamma)
             )
-        policy_loss = torch.tensor(policy_losses).mean()
+        policy_loss = torch.stack(cast(list[Tensor], policy_losses)).mean()
         scores.append(sum(_scores) / batch_size)
         optimizer.zero_grad()
         policy_loss.backward()  # This gives us the gradient
