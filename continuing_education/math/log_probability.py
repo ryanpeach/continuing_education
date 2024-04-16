@@ -89,6 +89,7 @@ def logarithm_properties() -> None:
 if __name__ == "__main__":
     logarithm_properties()
 
+
 # %% [markdown]
 # These properties are useful in machine learning because they allow us to turn products of probabilities into sums of log probabilities, which are easier computationally.
 #
@@ -128,3 +129,29 @@ if __name__ == "__main__":
 #
 # What this tells us is that the loss function will get asymptotically closer to 0 as the probability of the action taken approaches 1. It will also explode into the positives as the probability of the action taken approaches 0. For positive rewards, this is good because it will push the probability of actions which lead to positive rewards towards 1.
 #
+
+# %% [markdown]
+# One way you can visualize this is by mapping the [0, 1] range of probabilities to the [-inf, inf] continuous numbers using a sigmoid function.
+#
+# $y = \log(\frac{1}{1+e^{-x}})$
+
+
+# %%
+def plot_logarithm_continuous() -> None:
+    # Generating values from 0.01 to 1 (avoiding zero to prevent -inf in log calculation)
+    max_x = 5
+    x_values = np.linspace(-max_x, max_x, 1000)
+    log_values = np.log(1 / (1 + np.exp(-x_values)))
+
+    # Creating the plot
+    fig = px.line(
+        x=x_values,
+        y=log_values,
+        labels={"x": "x", "y": "log(x/(1+e^(-x)))"},
+        title=f"Logarithm of x from {1/(1+np.exp(-max_x))*100:.2f}% to {1/(1+np.exp(max_x))*100:.2f}% where x is first passed through a sigmoid function to make it continuous",
+    )
+    fig.show()
+
+
+if __name__ == "__main__":
+    plot_logarithm_continuous()
