@@ -192,6 +192,8 @@ def objective(
     """The objective function for the DQN algorithm is simple regression loss."""
     states = torch.tensor([s.state for s in batch]).float().to(DEVICE) # shape (batch_size, state_size)
     assert states.shape[1] == value_network.state_size, "The state size of the value network should match the state size of the batch"
+    actions = torch.tensor([s.action for s in batch]).long().to(DEVICE).unsqueeze(1) # shape (batch_size, 1)
+    assert actions.shape[1] == 1, "The action should be a scalar value"
     rewards = torch.tensor([s.reward for s in batch]).float().to(DEVICE).unsqueeze(1) # shape (batch_size, 1)
     assert rewards.shape[1] == 1, "The reward should be a scalar value"
     next_states = torch.tensor([s.next_state for s in batch]).float().to(DEVICE) # shape (batch_size, state_size)
@@ -216,7 +218,8 @@ def objective(
     assert bellman.shape[0] == len(batch), "The first dimension of the output should match the batch size"
     assert bellman.shape[1] == 1, "The bellman equation should output a scalar value"
 
-    loss = nn.MSELoss()(predicted_q_values.max(1).values.unsqueeze(1), bellman)
+    # We predict the Q values for the current state given the actual action, vs the predicted future rewards from the bellman equation
+    loss = nn.MSELoss()(predicted_q_values.gather(1, actions).unsqueeze(1), bellman)
     assert loss.shape == (), "The loss should be a scalar value"
 
     return loss
@@ -304,7 +307,7 @@ if __name__ == "__main__":
         fig = px.line(scores, title="Scores over time")
         fig.show()
     ExperimentManager(
-        name="REINFORCE",
+        name="DQN",
         description="Main Results",
         primary_metric="last_10_percent_mean",
         file=__this_file,
