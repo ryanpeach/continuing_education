@@ -82,7 +82,7 @@ class QLearningModel(nn.Module):
         state = state.to(DEVICE)
         return self.network(state)
 
-    def act(self, state: State, exploration_rate: float) -> Action:
+    def act(self, state: State, *, exploration_rate: float) -> Action:
         """
         Same as the policy network, but instead of softmaxing and sampling,
         the network actually is a regressor returning real numbered values, and we are argmaxing over them.
