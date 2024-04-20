@@ -34,7 +34,7 @@ if __name__ == "__main__":
 # %%
 from torch import nn
 
-from continuing_education.policy_gradient_methods.reinforce import collect_episode, SamplePolicy, Action, State, Env, cumulative_discounted_future_rewards
+from continuing_education.policy_gradient_methods.reinforce import collect_episode, Action, State, Env
 import random
 
 # %% [markdown]
@@ -44,7 +44,6 @@ import random
 
 # %%
 
-from typing import Any
 
 class QLearningModel(nn.Module):
     def __init__(
@@ -310,7 +309,6 @@ if __name__ == "__main__":
 
 # %%
 import gym
-import plotly.express as px
 from continuing_education.lib.experiments import ExperimentManager
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
