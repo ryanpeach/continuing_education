@@ -34,7 +34,7 @@ if __name__ == "__main__":
 # %%
 from torch import nn
 
-from continuing_education.policy_gradient_methods.reinforce import collect_episode, Action, State, Env
+from continuing_education.policy_gradient_methods.reinforce import Action, State, Env
 import random
 
 # %% [markdown]
@@ -84,7 +84,7 @@ class QLearningModel(nn.Module):
 
     def act(self, state: State, exploration_rate: float) -> Action:
         """
-        Same as the policy network, but instead of softmaxing and sampling, 
+        Same as the policy network, but instead of softmaxing and sampling,
         the network actually is a regressor returning real numbered values, and we are argmaxing over them.
         We don't get a log_prob, and we don't pass a temperature, because Q networks cant handle stochastic policies.
         We can't use a temperature to control the exploration rate, because the network is not a probability distribution.
@@ -115,6 +115,7 @@ from dataclasses import dataclass
 from collections import deque
 from typing import NewType
 
+
 @dataclass
 class SARS:
     state: State
@@ -123,11 +124,11 @@ class SARS:
     next_state: State
     done: bool
 
+
 Trajectory = NewType("Trajectory", list[SARS])
 
 # %%
 from typing import Generator
-from gym import Env
 
 from continuing_education.policy_gradient_methods.reinforce.reinforce import Reward
 
@@ -156,8 +157,8 @@ def collect_episode(
             break
 
 
-
 # %%
+
 
 class ActionReplayMemory:
     """The simplest kind of memory buffer for q learning.
@@ -165,6 +166,7 @@ class ActionReplayMemory:
     These SAR objects have been modified already using `continuing_education.policy_gradient_methods.reinforce.cumulative_discounted_future_rewards`
     to replace their reward values.
     """
+
     def __init__(self, max_size: int) -> None:
         self.buffer: deque[SARS] = deque(maxlen=max_size)
 
@@ -188,6 +190,7 @@ from torch import Tensor
 from tqdm.notebook import trange
 import torch.optim as optim
 
+
 def objective(
     *,
     value_network: QLearningModel,
@@ -195,37 +198,67 @@ def objective(
     gamma: float,
 ) -> Tensor:
     """The objective function for the DQN algorithm is simple regression loss."""
-    states = torch.tensor([s.state for s in batch]).float().to(DEVICE) # shape (batch_size, state_size)
-    assert states.shape[1] == value_network.state_size, "The state size of the value network should match the state size of the batch"
-    actions = torch.tensor([s.action for s in batch]).long().to(DEVICE).unsqueeze(1) # shape (batch_size, 1)
+    states = (
+        torch.tensor([s.state for s in batch]).float().to(DEVICE)
+    )  # shape (batch_size, state_size)
+    assert (
+        states.shape[1] == value_network.state_size
+    ), "The state size of the value network should match the state size of the batch"
+    actions = (
+        torch.tensor([s.action for s in batch]).long().to(DEVICE).unsqueeze(1)
+    )  # shape (batch_size, 1)
     assert actions.shape[1] == 1, "The action should be a scalar value"
-    rewards = torch.tensor([s.reward for s in batch]).float().to(DEVICE).unsqueeze(1) # shape (batch_size, 1)
+    rewards = (
+        torch.tensor([s.reward for s in batch]).float().to(DEVICE).unsqueeze(1)
+    )  # shape (batch_size, 1)
     assert rewards.shape[1] == 1, "The reward should be a scalar value"
-    next_states = torch.tensor([s.next_state for s in batch]).float().to(DEVICE) # shape (batch_size, state_size)
-    assert next_states.shape[1] == value_network.state_size, "The state size of the value network should match the state size of the batch"
-    dones = torch.tensor([s.done for s in batch]).float().to(DEVICE).unsqueeze(1) # shape (batch_size, 1)
+    next_states = (
+        torch.tensor([s.next_state for s in batch]).float().to(DEVICE)
+    )  # shape (batch_size, state_size)
+    assert (
+        next_states.shape[1] == value_network.state_size
+    ), "The state size of the value network should match the state size of the batch"
+    dones = (
+        torch.tensor([s.done for s in batch]).float().to(DEVICE).unsqueeze(1)
+    )  # shape (batch_size, 1)
     assert dones.shape[1] == 1, "The done should be a scalar value"
 
     # We are going to use the value network to predict the Q values for the current state
-    predicted_q_values = value_network.forward(states) # shape (batch_size, action_size)
-    assert predicted_q_values.shape[0] == len(batch), "The first dimension of the output should match the batch size"
-    assert predicted_q_values.shape[1] == value_network.action_size, "The output of the network should be the same size as the action space"
-    
+    predicted_q_values = value_network.forward(
+        states
+    )  # shape (batch_size, action_size)
+    assert predicted_q_values.shape[0] == len(
+        batch
+    ), "The first dimension of the output should match the batch size"
+    assert (
+        predicted_q_values.shape[1] == value_network.action_size
+    ), "The output of the network should be the same size as the action space"
+
     # We are going to use the value network to predict the Q values for the next state
-    next_predicted_q_values = value_network.forward(next_states) # shape (batch_size, action_size)
-    assert next_predicted_q_values.shape[0] == len(batch), "The first dimension of the output should match the batch size"
-    assert next_predicted_q_values.shape[1] == value_network.action_size, "The output of the network should be the same size as the action space"
+    next_predicted_q_values = value_network.forward(
+        next_states
+    )  # shape (batch_size, action_size)
+    assert next_predicted_q_values.shape[0] == len(
+        batch
+    ), "The first dimension of the output should match the batch size"
+    assert (
+        next_predicted_q_values.shape[1] == value_network.action_size
+    ), "The output of the network should be the same size as the action space"
 
     # Generate the Q Loss using the bellman equation
     # Q(s, a) = r + gamma * max_a'(Q(s', a'))
     next_action_value_predicted = next_predicted_q_values.max(1).values.unsqueeze(1)
     bellman = rewards + gamma * next_action_value_predicted * (1.0 - dones)
-    assert bellman.shape[0] == len(batch), "The first dimension of the output should match the batch size"
+    assert bellman.shape[0] == len(
+        batch
+    ), "The first dimension of the output should match the batch size"
     assert bellman.shape[1] == 1, "The bellman equation should output a scalar value"
 
     # We predict the Q values for the current state given the actual action, vs the predicted future rewards from the bellman equation
     inp = predicted_q_values.gather(1, actions)
-    assert inp.shape == bellman.shape, f"The input and output of the network should have the same shape, got {inp.shape} and {bellman.shape}"
+    assert (
+        inp.shape == bellman.shape
+    ), f"The input and output of the network should have the same shape, got {inp.shape} and {bellman.shape}"
     loss = nn.MSELoss()(inp, bellman)
     assert loss.shape == (), "The loss should be a scalar value"
 
@@ -254,7 +287,10 @@ def dqn_train(
     for _ in trange(num_episodes):
         _scores = []
         for sars in collect_episode(
-            env=env, value_network=value_network, max_t=max_t, exploration_rate=exploration_rate
+            env=env,
+            value_network=value_network,
+            max_t=max_t,
+            exploration_rate=exploration_rate,
         ):
             memory.push(sars)
             _scores.append(sars.reward)
@@ -301,7 +337,9 @@ if __name__ == "__main__":
         print("test_reinforce_train passed")
 
 # %%
-from continuing_education.policy_gradient_methods.reinforce.reinforce import get_environment_space
+from continuing_education.policy_gradient_methods.reinforce.reinforce import (
+    get_environment_space,
+)
 
 
 if __name__ == "__main__":
@@ -313,7 +351,10 @@ from continuing_education.lib.experiments import ExperimentManager
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-def exploration_rate_line(*, explore_rate_decay: float, start_value: float, num_episodes: int) -> list[float]:
+
+def exploration_rate_line(
+    *, explore_rate_decay: float, start_value: float, num_episodes: int
+) -> list[float]:
     """Plot the exploration rate over time."""
     exploration_rate = start_value
     exploration_rates = []
@@ -321,6 +362,7 @@ def exploration_rate_line(*, explore_rate_decay: float, start_value: float, num_
         exploration_rates.append(exploration_rate)
         exploration_rate *= explore_rate_decay
     return exploration_rates
+
 
 if __name__ == "__main__":
     LR = 1e-2
@@ -357,14 +399,25 @@ if __name__ == "__main__":
         last_10_percent_mean.append(
             sum(scores[int(NUM_EPISODES * 0.9) :]) / (NUM_EPISODES * 0.1)
         )
-        _exploration_rate_line = exploration_rate_line(explore_rate_decay=EXPLORE_RATE_DECAY, start_value=1.0, num_episodes=NUM_EPISODES)
+        _exploration_rate_line = exploration_rate_line(
+            explore_rate_decay=EXPLORE_RATE_DECAY,
+            start_value=1.0,
+            num_episodes=NUM_EPISODES,
+        )
         fig = make_subplots(specs=[[{"secondary_y": True}]])
         fig.add_trace(
-            go.Scatter(x=[i for i in range(NUM_EPISODES)], y=_exploration_rate_line, name="Exploration Rate", mode="lines"),
+            go.Scatter(
+                x=[i for i in range(NUM_EPISODES)],
+                y=_exploration_rate_line,
+                name="Exploration Rate",
+                mode="lines",
+            ),
             secondary_y=True,
         )
         fig.add_trace(
-            go.Scatter(x=[i for i in range(NUM_EPISODES)], y=scores, name="Score", mode="lines"),
+            go.Scatter(
+                x=[i for i in range(NUM_EPISODES)], y=scores, name="Score", mode="lines"
+            ),
             secondary_y=False,
         )
         fig.update_layout(title="DQN Training")
