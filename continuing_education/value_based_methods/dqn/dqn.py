@@ -221,7 +221,9 @@ def objective(
     assert bellman.shape[1] == 1, "The bellman equation should output a scalar value"
 
     # We predict the Q values for the current state given the actual action, vs the predicted future rewards from the bellman equation
-    loss = nn.MSELoss()(predicted_q_values.gather(1, actions).unsqueeze(1), bellman)
+    inp = predicted_q_values.gather(1, actions)
+    assert inp.shape == bellman.shape, f"The input and output of the network should have the same shape, got {inp.shape} and {bellman.shape}"
+    loss = nn.MSELoss()(inp, bellman)
     assert loss.shape == (), "The loss should be a scalar value"
 
     return loss
@@ -275,8 +277,8 @@ import plotly.express as px
 from continuing_education.lib.experiments import ExperimentManager
 
 if __name__ == "__main__":
-    LR = 1e-2
-    GAMMA = 1.0  # Cartpole benefits from a high gamma because the longer the pole is up, the higher the reward
+    LR = 1e-3
+    GAMMA = 0.99  # Cartpole benefits from a high gamma because the longer the pole is up, the higher the reward
     HIDDEN_SIZES = [16, 16]
     NUM_EPISODES = 1000
     MAX_T = 100
