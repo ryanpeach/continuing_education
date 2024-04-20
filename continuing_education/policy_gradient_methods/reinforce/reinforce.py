@@ -98,7 +98,7 @@ LogProb = NewType("LogProb", Tensor)
 Loss = NewType("Loss", Tensor)
 
 # %%
-from typing import List, Tuple
+from typing import Any
 from torch import nn
 
 
@@ -116,7 +116,7 @@ class Policy(nn.Module):
     and returns a probability distribution over the action space"""
 
     def __init__(
-        self, *, state_size: int, action_size: int, hidden_sizes: List[int]
+        self, *, state_size: int, action_size: int, hidden_sizes: list[int]
     ) -> None:
         """
         This is a very simple feed forward network
@@ -150,7 +150,7 @@ class Policy(nn.Module):
         state = state.to(DEVICE)
         return self.network(state)
 
-    def act(self, state: State, *, temperature: float) -> Tuple[Action, LogProb]:
+    def act(self, state: State, *, temperature: float) -> tuple[Action, LogProb]:
         """Same as forward, instead of returning the entire distribution, we
         return the maximum probability action
         along with the log probability of that action
@@ -213,10 +213,10 @@ class SAR:
 
 
 # A list of SAR representing a single episode
-Trajectory = NewType("Trajectory", List[SAR])
+Trajectory = NewType("Trajectory", list[SAR])
 
 # A list of just the rewards from a single episode
-RewardTrajectory = NewType("RewardTrajectory", List[Reward])
+RewardTrajectory = NewType("RewardTrajectory", list[Reward])
 
 
 # %% [markdown]
@@ -308,7 +308,7 @@ def cumulative_discounted_future_rewards(
         raise ValueError("Trajectory needs at least one item.")
     if len(trajectory) == 1:
         return CumDiscFutureRewardTrajectory([trajectory[0]])
-    discounted_rewards: List[Reward] = []
+    discounted_rewards: list[Reward] = []
     cumulative_reward: Reward = Reward(0)
     for reward in reversed(trajectory):
         cumulative_reward = Reward(reward + gamma * cumulative_reward)
@@ -590,7 +590,7 @@ class SamplePolicy(Policy):
     and returns a probability distribution over the action space.
     Act samples from the distribution instead of taking the greedy argmax."""
 
-    def act(self, state: State, *, temperature: float) -> Tuple[Action, LogProb]:
+    def act(self, state: State, *, temperature: float) -> tuple[Action, LogProb]:
         """Same as forward, instead of returning the entire distribution, we
         sample from the distribution
         along with the log probability of that action.

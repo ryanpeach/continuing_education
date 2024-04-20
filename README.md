@@ -5,10 +5,18 @@ Some projects I'm using to learn AI since my MS
 # TODO
 
 * Reinforcement Learning
-    * [X] Value Based Methods - It's not implemented here, but from my MS I feel I'm already an "expert" in Q-Learning up to and including RAINBOW.
+    * Value Based Methods - I'm pretty much up to date with these methods, but might as well implement them. I may go into less explanation though.
+        * [X] Deep Q Learning
+        * [ ] Double Q Learning
+        * [ ] Dueling Q Learning
+        * [ ] Multi Step Learning
+        * [ ] Prioritized Experience Replay
+        * [ ] Distributional DQN
+        * [ ] Noisy Nets
+        * [ ] RAINBOW
     * Policy Based Methods
         * [X] REINFORCE
-        * [ ] Actor-Critic
+        * [x] Actor-Critic
         * [ ] Proximal Policy Optimization (PPO)
     * Model Based Reinforcement Learning
         * [ ] AlphaZero
