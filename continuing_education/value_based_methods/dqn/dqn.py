@@ -169,6 +169,8 @@ class ActionReplayMemory:
         self.buffer.append(item)
 
     def sample(self, batch_size: int) -> list[SARS]:
+        if len(self.buffer) < batch_size:
+            raise ValueError("Not enough samples in the buffer")
         return random.sample(self.buffer, batch_size)
 
     def __len__(self) -> int:
