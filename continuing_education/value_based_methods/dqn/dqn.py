@@ -312,7 +312,8 @@ if __name__ == "__main__":
 import gym
 import plotly.express as px
 from continuing_education.lib.experiments import ExperimentManager
-import pandas as pd
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 def exploration_rate_line(*, explore_rate_decay: float, start_value: float, num_episodes: int) -> list[float]:
     """Plot the exploration rate over time."""
@@ -324,16 +325,17 @@ def exploration_rate_line(*, explore_rate_decay: float, start_value: float, num_
     return exploration_rates
 
 if __name__ == "__main__":
-    LR = 1e-3
+    LR = 1e-2
     GAMMA = 0.99999  # Cartpole benefits from a high gamma because the longer the pole is up, the higher the reward
     HIDDEN_SIZES = [16, 16]
-    NUM_EPISODES = 1000
+    NUM_EPISODES = 100
     MAX_T = 100
     BATCH_SIZE = 64
     MAX_MEMORY = 10000
-    EXPLORE_RATE_DECAY = 0.9999
+    EXPLORE_RATE_DECAY = 0.995
     # Do this a few times to prove consistency
     last_10_percent_mean = []
+
     for _ in range(3):
         env = gym.make("CartPole-v1")
         value_network = QLearningModel(
@@ -358,13 +360,19 @@ if __name__ == "__main__":
             sum(scores[int(NUM_EPISODES * 0.9) :]) / (NUM_EPISODES * 0.1)
         )
         _exploration_rate_line = exploration_rate_line(explore_rate_decay=EXPLORE_RATE_DECAY, start_value=1.0, num_episodes=NUM_EPISODES)
-        df = pd.DataFrame(
-            {
-                "exploration_rate" : _exploration_rate_line,
-                "scores": scores,
-            }
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
+        fig.add_trace(
+            go.Scatter(x=[i for i in range(NUM_EPISODES)], y=_exploration_rate_line, name="Exploration Rate", mode="lines"),
+            secondary_y=True,
         )
-        fig = px.line(df, x=df.index, title="DQN Training")
+        fig.add_trace(
+            go.Scatter(x=[i for i in range(NUM_EPISODES)], y=scores, name="Score", mode="lines"),
+            secondary_y=False,
+        )
+        fig.update_layout(title="DQN Training")
+        fig.update_xaxes(title_text="Episode")
+        fig.update_yaxes(title_text="Exploration Rate", secondary_y=True)
+        fig.update_yaxes(title_text="Score", secondary_y=False)
         fig.show()
     ExperimentManager(
         name="DQN",
