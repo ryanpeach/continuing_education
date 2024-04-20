@@ -43,7 +43,6 @@ import random
 #
 # Lets quickly create a simple Q Learning Agent and test it on cartpole environment.
 
-
 # %%
 class QLearningModel(nn.Module):
     def __init__(
@@ -102,10 +101,13 @@ class QLearningModel(nn.Module):
 
         # Now we want to get the action that corresponds to the highest probability
         # TODO: We could sample from the pdf instead of taking the greedy argmax
-        action_idx = torch.argmax(action_values)
+        action_idx = torch.argmax(action_values, dim=-1)
 
         # We return the action and the log probability of the action
         action_idx_cpu = int(action_idx.item())
+        assert (
+            0 <= action_idx_cpu < self.action_size
+        ), "The action index should be within the action space"
         if random.random() < exploration_rate:
             return Action(random.randint(0, self.action_size - 1))
 
@@ -300,6 +302,7 @@ def dqn_train(
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
+        exploration_rate *= exploration_rate_decay
         scores.append(Reward(sum(_scores)))
 
     return scores
@@ -312,23 +315,23 @@ from continuing_education.policy_gradient_methods.reinforce.reinforce import Moc
 def test_reinforce_train() -> None:
     """Test the reinforce training loop on the mock environment."""
     env = MockEnv(max_steps=10)
-    value_network = QLearningModel(state_size=1, action_size=2, hidden_sizes=[16])
-    optimizer = optim.Adam(value_network.parameters(), lr=1e-2)
+    value_network = QLearningModel(state_size=1, action_size=2, hidden_sizes=[16, 16])
+    optimizer = optim.Adam(value_network.parameters(), lr=1e-3)
     memory = ActionReplayMemory(max_size=1000)
     scores = dqn_train(
         env=env,
         value_network=value_network,
         optimizer=optimizer,
         memory=memory,
-        gamma=0.999999999,
+        gamma=0.999,
         num_episodes=100,
         max_t=10,
         batch_size=50,
-        exploration_rate_decay=0.0,
+        exploration_rate_decay=0.96,
     )
     assert all(
         [score == 10 for score in scores[90:]]
-    ), "The last 10 scores should be 10"
+    ), f"The last 10 scores should be 10, got: {scores[90:]}"
 
 
 if __name__ == "__main__":
@@ -368,11 +371,11 @@ if __name__ == "__main__":
     LR = 1e-2
     GAMMA = 0.99999  # Cartpole benefits from a high gamma because the longer the pole is up, the higher the reward
     HIDDEN_SIZES = [16, 16]
-    NUM_EPISODES = 1000
+    NUM_EPISODES = 100
     MAX_T = 100
     BATCH_SIZE = 64
     MAX_MEMORY = 1000
-    EXPLORE_RATE_DECAY = 0.995
+    EXPLORE_RATE_DECAY = 0.96
     # Do this a few times to prove consistency
     last_10_percent_mean = []
 
