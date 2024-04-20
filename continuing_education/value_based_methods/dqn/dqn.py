@@ -43,6 +43,7 @@ import random
 #
 # Lets quickly create a simple Q Learning Agent and test it on cartpole environment.
 
+
 # %%
 class QLearningModel(nn.Module):
     def __init__(
@@ -107,7 +108,7 @@ class QLearningModel(nn.Module):
         action_idx_cpu = int(action_idx.item())
         if random.random() < exploration_rate:
             return Action(random.randint(0, self.action_size - 1))
-        
+
         return Action(action_idx_cpu)
 
 
@@ -136,7 +137,7 @@ from continuing_education.policy_gradient_methods.reinforce.reinforce import Rew
 
 def collect_episode(
     *, env: Env, value_network: QLearningModel, max_t: int, exploration_rate: float
-) -> Generator[Trajectory, None, None]:
+) -> Generator[SARS, None, None]:
     """2.1 Returns the trajectory of one episode of using the value network.
 
     The output is a list of SARS tuples, where each tuple represents a state, action, reward, next_state tuple.
@@ -299,7 +300,7 @@ def dqn_train(
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
-        scores.append(sum(_scores))
+        scores.append(Reward(sum(_scores)))
 
     return scores
 
