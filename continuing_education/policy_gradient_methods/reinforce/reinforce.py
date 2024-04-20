@@ -345,7 +345,7 @@ if __name__ == "__main__":
 
 
 # %%
-def objective(*, policy: Policy, trajectory: Trajectory, gamma: float) -> Loss:
+def objective(*, trajectory: Trajectory, gamma: float) -> Loss:
     """
     2.2.2 Returns the likelihood of a trajectory given a policy.
     Instead of doing 1/T, we normalize the cumulative discounted rewards as it says
@@ -406,7 +406,7 @@ def reinforce_train(
             env=env, policy=policy, max_t=max_t, temperature=1.0
         )
         scores.append(sum([sar.reward for sar in trajectory]))
-        policy_loss = objective(policy=policy, trajectory=trajectory, gamma=gamma)
+        policy_loss = objective(trajectory=trajectory, gamma=gamma)
         optimizer.zero_grad()
         policy_loss.backward()  # This gives us the gradient
         optimizer.step()
@@ -653,7 +653,7 @@ def reinforce_train_batch(
             )
             _scores.append(sum([sar.reward for sar in trajectory]))
             policy_losses.append(
-                objective(policy=policy, trajectory=trajectory, gamma=gamma)
+                objective(trajectory=trajectory, gamma=gamma)
             )
         policy_loss = torch.stack(cast(list[Tensor], policy_losses)).mean()
         scores.append(sum(_scores) / batch_size)

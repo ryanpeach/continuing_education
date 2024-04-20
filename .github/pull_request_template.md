@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
 - [ ] Ask ChatGPT to review your work.
 
-- [ ] Functions that have more than one parameter should have a `*` before the first parameter to force the user to use named arguments.
+- [ ] Functions that have more than one parameter should have a `*` before the first or second parameter to force the user to use named arguments, unless there is only one parameter.
 
 - [ ] Do not set default values, you might forget to pass parameters up the stack.
 
