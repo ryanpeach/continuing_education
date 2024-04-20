@@ -380,3 +380,11 @@ if __name__ == "__main__":
         primary_metric="last_10_percent_mean",
         file=__this_file,
     ).commit(metrics={"last_10_percent_mean": last_10_percent_mean})
+
+# %% [markdown]
+# # References
+#
+# Honestly this was mostly from memory, with a little help from ChatGPT. Here are some resources though:
+#
+# 1. Mnih, V., Kavukcuoglu, K., Silver, D., Graves, A., Antonoglou, I., Wierstra, D., & Riedmiller, M. (2013). Playing Atari with Deep Reinforcement Learning. arXiv [Cs.LG]. Retrieved from http://arxiv.org/abs/1312.5602
+# 2. UNIT 3. DEEP Q-LEARNING WITH ATARI GAMES. Hugging Face. (n.d.). https://huggingface.co/learn/deep-rl-course/unit3
