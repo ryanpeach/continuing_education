@@ -37,14 +37,13 @@ from torch import nn
 from continuing_education.policy_gradient_methods.reinforce import Action, State, Env
 import random
 
+
 # %% [markdown]
 # # Q Learning
 #
 # Lets quickly create a simple Q Learning Agent and test it on cartpole environment.
 
 # %%
-
-
 class QLearningModel(nn.Module):
     def __init__(
         self, *, state_size: int, action_size: int, hidden_sizes: list[int]
@@ -107,7 +106,9 @@ class QLearningModel(nn.Module):
         # We return the action and the log probability of the action
         action_idx_cpu = int(action_idx.item())
         if random.random() < exploration_rate:
-            return Action(action_idx_cpu)
+            return Action(random.randint(0, self.action_size - 1))
+        
+        return Action(action_idx_cpu)
 
 
 # %%
@@ -158,8 +159,6 @@ def collect_episode(
 
 
 # %%
-
-
 class ActionReplayMemory:
     """The simplest kind of memory buffer for q learning.
     This is a FIFO buffer of a fixed length that stores SAR objects from `continuing_education.policy_gradient_methods.reinforce.collect_episode`.
@@ -324,7 +323,7 @@ def test_reinforce_train() -> None:
         num_episodes=100,
         max_t=10,
         batch_size=50,
-        exploration_rate_decay=0.99,
+        exploration_rate_decay=0.0,
     )
     assert all(
         [score == 10 for score in scores[90:]]
@@ -371,7 +370,7 @@ if __name__ == "__main__":
     NUM_EPISODES = 1000
     MAX_T = 100
     BATCH_SIZE = 64
-    MAX_MEMORY = 10000
+    MAX_MEMORY = 1000
     EXPLORE_RATE_DECAY = 0.995
     # Do this a few times to prove consistency
     last_10_percent_mean = []
