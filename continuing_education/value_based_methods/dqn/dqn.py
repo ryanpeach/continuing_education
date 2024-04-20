@@ -35,6 +35,7 @@ if __name__ == "__main__":
 from torch import nn
 
 from continuing_education.policy_gradient_methods.reinforce import collect_episode, SamplePolicy, Action, State, Env, cumulative_discounted_future_rewards
+import random
 
 # %% [markdown]
 # # Q Learning
@@ -82,11 +83,13 @@ class QLearningModel(nn.Module):
         state = state.to(DEVICE)
         return self.network(state)
 
-    def act(self, state: State) -> Action:
+    def act(self, state: State, exploration_rate: float) -> Action:
         """
         Same as the policy network, but instead of softmaxing and sampling, 
         the network actually is a regressor returning real numbered values, and we are argmaxing over them.
         We don't get a log_prob, and we don't pass a temperature, because Q networks cant handle stochastic policies.
+        We can't use a temperature to control the exploration rate, because the network is not a probability distribution.
+        However we can randomly choose to explore with a probability of exploration_rate, which will randomly choose an action if a random number is less than exploration_rate.
         """
         # First we got to convert out of numpy and into pytorch
         state_tensor = torch.from_numpy(state).float().unsqueeze(0)
@@ -103,12 +106,13 @@ class QLearningModel(nn.Module):
         action_idx = torch.argmax(action_values)
 
         # We return the action and the log probability of the action
-        return Action(int(action_idx.item()))
+        action_idx_cpu = int(action_idx.item())
+        if random.random() < exploration_rate:
+            return Action(action_idx_cpu)
 
 
 # %%
 from dataclasses import dataclass
-import random
 from collections import deque
 from typing import NewType
 
@@ -130,7 +134,7 @@ from continuing_education.policy_gradient_methods.reinforce.reinforce import Rew
 
 
 def collect_episode(
-    *, env: Env, value_network: QLearningModel, max_t: int = 1000
+    *, env: Env, value_network: QLearningModel, max_t: int, exploration_rate: float
 ) -> Generator[Trajectory, None, None]:
     """2.1 Returns the trajectory of one episode of using the value network.
 
@@ -139,7 +143,7 @@ def collect_episode(
     state, _ = env.reset()
     done = False
     for _ in range(max_t):
-        action = value_network.act(state)
+        action = value_network.act(state, exploration_rate=exploration_rate)
         next_state, reward, done, _, _ = env.step(action)
         yield SARS(
             state=State(state),
@@ -240,16 +244,18 @@ def dqn_train(
     num_episodes: int,
     max_t: int,
     batch_size: int,
+    exploration_rate_decay: float,
 ) -> list[Reward]:
     """Algorithm 1 REINFORCE"""
     assert gamma <= 1, "Gamma should be less than or equal to 1"
     assert gamma > 0, "Gamma should be greater than 0"
     assert num_episodes > 0, "Number of episodes should be greater than 0"
+    exploration_rate = 1.0
     scores: list[Reward] = []
     for _ in trange(num_episodes):
         _scores = []
         for sars in collect_episode(
-            env=env, value_network=value_network, max_t=max_t
+            env=env, value_network=value_network, max_t=max_t, exploration_rate=exploration_rate
         ):
             memory.push(sars)
             _scores.append(sars.reward)
@@ -265,6 +271,37 @@ def dqn_train(
 
 
 # %%
+from continuing_education.policy_gradient_methods.reinforce.reinforce import MockEnv
+
+
+def test_reinforce_train() -> None:
+    """Test the reinforce training loop on the mock environment."""
+    env = MockEnv(max_steps=10)
+    value_network = QLearningModel(state_size=1, action_size=2, hidden_sizes=[16])
+    optimizer = optim.Adam(value_network.parameters(), lr=1e-2)
+    memory = ActionReplayMemory(max_size=1000)
+    scores = dqn_train(
+        env=env,
+        value_network=value_network,
+        optimizer=optimizer,
+        memory=memory,
+        gamma=0.999999999,
+        num_episodes=100,
+        max_t=10,
+        batch_size=50,
+        exploration_rate_decay=0.99,
+    )
+    assert all(
+        [score == 10 for score in scores[90:]]
+    ), "The last 10 scores should be 10"
+
+
+if __name__ == "__main__":
+    for _ in range(3):
+        test_reinforce_train()
+        print("test_reinforce_train passed")
+
+# %%
 from continuing_education.policy_gradient_methods.reinforce.reinforce import get_environment_space
 
 
@@ -275,15 +312,26 @@ if __name__ == "__main__":
 import gym
 import plotly.express as px
 from continuing_education.lib.experiments import ExperimentManager
+import pandas as pd
+
+def exploration_rate_line(*, explore_rate_decay: float, start_value: float, num_episodes: int) -> list[float]:
+    """Plot the exploration rate over time."""
+    exploration_rate = start_value
+    exploration_rates = []
+    for _ in range(num_episodes):
+        exploration_rates.append(exploration_rate)
+        exploration_rate *= explore_rate_decay
+    return exploration_rates
 
 if __name__ == "__main__":
     LR = 1e-3
-    GAMMA = 0.99  # Cartpole benefits from a high gamma because the longer the pole is up, the higher the reward
+    GAMMA = 0.99999  # Cartpole benefits from a high gamma because the longer the pole is up, the higher the reward
     HIDDEN_SIZES = [16, 16]
     NUM_EPISODES = 1000
     MAX_T = 100
     BATCH_SIZE = 64
     MAX_MEMORY = 10000
+    EXPLORE_RATE_DECAY = 0.9999
     # Do this a few times to prove consistency
     last_10_percent_mean = []
     for _ in range(3):
@@ -302,13 +350,21 @@ if __name__ == "__main__":
             num_episodes=NUM_EPISODES,
             max_t=MAX_T,
             memory=ActionReplayMemory(MAX_MEMORY),
-            batch_size=64,
+            batch_size=BATCH_SIZE,
+            exploration_rate_decay=EXPLORE_RATE_DECAY,
         )
         # Calculate the mean of the last 10 % of the scores
         last_10_percent_mean.append(
             sum(scores[int(NUM_EPISODES * 0.9) :]) / (NUM_EPISODES * 0.1)
         )
-        fig = px.line(scores, title="Scores over time")
+        _exploration_rate_line = exploration_rate_line(explore_rate_decay=EXPLORE_RATE_DECAY, start_value=1.0, num_episodes=NUM_EPISODES)
+        df = pd.DataFrame(
+            {
+                "exploration_rate" : _exploration_rate_line,
+                "scores": scores,
+            }
+        )
+        fig = px.line(df, x=df.index, title="DQN Training")
         fig.show()
     ExperimentManager(
         name="DQN",
