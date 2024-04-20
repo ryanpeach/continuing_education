@@ -368,14 +368,14 @@ def exploration_rate_line(
 
 
 if __name__ == "__main__":
-    LR = 1e-2
+    LR = 1e-3
     GAMMA = 0.99999  # Cartpole benefits from a high gamma because the longer the pole is up, the higher the reward
     HIDDEN_SIZES = [16, 16]
-    NUM_EPISODES = 200
+    NUM_EPISODES = 500
     MAX_T = 100
     BATCH_SIZE = 64
-    MAX_MEMORY = 1000
-    EXPLORE_RATE_DECAY = 0.98
+    MAX_MEMORY = 10000
+    EXPLORE_RATE_DECAY = 0.99
     # Do this a few times to prove consistency
     last_10_percent_mean = []
 
