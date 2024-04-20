@@ -98,7 +98,6 @@ LogProb = NewType("LogProb", Tensor)
 Loss = NewType("Loss", Tensor)
 
 # %%
-from typing import Any
 from torch import nn
 
 
