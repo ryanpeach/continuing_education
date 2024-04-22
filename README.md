@@ -6,6 +6,7 @@ Some projects I'm using to learn AI since my MS
 
 * Reinforcement Learning
     * Value Based Methods - I'm pretty much up to date with these methods, but might as well implement them. I may go into less explanation though.
+        * [ ] Monte-Carlo Methods
         * [ ] $TD(\lambda)$
         * [X] Deep Q Learning
         * [ ] Double Q Learning
