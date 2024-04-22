@@ -16,7 +16,7 @@ Some projects I'm using to learn AI since my MS
         * [ ] RAINBOW
     * Policy Based Methods
         * [X] REINFORCE
-        * [x] Actor-Critic
+        * [ ] Actor-Critic
         * [ ] Proximal Policy Optimization (PPO)
     * Model Based Reinforcement Learning
         * [ ] AlphaZero
