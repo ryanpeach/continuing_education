@@ -17,6 +17,8 @@
 * What are some differences in the `act` method between `QLearning` and `REINFORCE` #card
   * QLearning uses an argmax to select the best action whereas REINFORCE uses a softmax sample to select an action
   * QLearning has an epsilon greedy policy whereas REINFORCE has a stochastic policy
+* Define epsilon greedy policy #card
+  * An epsilon greedy policy is a policy that selects the best action with probability $1 - \epsilon$ and a random action with probability $\epsilon$
 * What are some differences in the `train` method between `QLearning` and `REINFORCE` #card
   * QLearning trains on each step whereas REINFORCE trains at the end of each episode
   * REINFORCE needs a whole trajectory to train, because it operates on real cumulative rewards, whereas QLearning can train on each step because it operates on predicted cumulative rewards

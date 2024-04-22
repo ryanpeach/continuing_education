@@ -652,9 +652,7 @@ def reinforce_train_batch(
                 env=env, policy=policy, max_t=max_t, temperature=temperature
             )
             _scores.append(sum([sar.reward for sar in trajectory]))
-            policy_losses.append(
-                objective(trajectory=trajectory, gamma=gamma)
-            )
+            policy_losses.append(objective(trajectory=trajectory, gamma=gamma))
         policy_loss = torch.stack(cast(list[Tensor], policy_losses)).mean()
         scores.append(sum(_scores) / batch_size)
         optimizer.zero_grad()
