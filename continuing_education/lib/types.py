@@ -5,7 +5,7 @@ from torch import Tensor
 
 # Lets make some types to make type annotation easier
 State = NewType("State", npt.NDArray[np.float32])
-DiscreteAction = NewType("Action", int)
+DiscreteAction = NewType("DiscreteAction", int)
 Reward = NewType("Reward", float)
 LogProb = NewType("LogProb", Tensor)
 Loss = NewType("Loss", Tensor)
