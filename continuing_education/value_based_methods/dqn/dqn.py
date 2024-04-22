@@ -39,9 +39,18 @@ import random
 
 
 # %% [markdown]
-# # Q Learning
+# # Deep Q Learning
 #
-# Lets quickly create a simple Q Learning Agent and test it on cartpole environment.
+# Lets create a simple Q Learning Agent and test it on cartpole environment.
+#
+# Q Learning creates a Q function $Q(s, a)$ which can map state and action pairs to a value, representing the expected future reward. Given this function, you can argmax over the action space to find the best action for any given state.
+#
+# Q Learning has several major advantages over REINFOCE. It is an offline algorithm, meaning it can learn from a fixed dataset. This also means it is much more sample efficient than REINFORCE, and can learn from its own past or even from human demonstrations. However, it is not as flexible as policy gradient methods, as it can only learn deterministic policies, and it is not able to act in continuous action spaces.
+#
+
+
+# %% [markdown]
+# The Q learning neural network is almost exactly the same as the REINFORCE network, except we don't softmax the output. This is only true when the action space is discrete. If the action space is continuous, we could not use Q learning, and would have to use a policy gradient method.
 
 
 # %%
@@ -115,10 +124,12 @@ class QLearningModel(nn.Module):
         return Action(action_idx_cpu)
 
 
+# %% [markdown]
+# In Q Learning we use SARS tuples instead of SAR tuples. SARS tuples are state, action, reward, next state tuples. We use these to train the Q function to predict the expected future reward for each state action pair, knowing the next state it leads to and the reward it received.
+
 # %%
 from dataclasses import dataclass
 from collections import deque
-from typing import NewType
 
 
 @dataclass
@@ -130,7 +141,8 @@ class SARS:
     done: bool
 
 
-Trajectory = NewType("Trajectory", list[SARS])
+# %% [markdown]
+# The collection function is a bit different than REINFORCE. We are going to yield each SARS tuple as we collect it, and then we will take one training step each time we return. We don't have to do it this way, but it is a common way to do it. It generally makes the training faster, because actions in gym take a comparatively long time to compute.
 
 # %%
 from typing import Generator
@@ -162,6 +174,10 @@ def collect_episode(
             break
 
 
+# %% [markdown]
+# Because Q Learning is an offline algorithm, we can use a replay buffer to store the SARS tuples. Replay buffers are just a kind of episodic memory for the agent, so that it can learn from past experience. This makes the algorithm much more sample efficient. We will use a simple deque as our replay buffer, which will store the last 1000 SARS tuples, and sample from them randomly. It will drop the oldest tuples when it reaches capacity.
+
+
 # %%
 class ActionReplayMemory:
     """The simplest kind of memory buffer for q learning.
@@ -187,6 +203,14 @@ class ActionReplayMemory:
 
 # %% [markdown]
 # # Train
+#
+# We train the Q Learning agent using a famous equation called the Bellman equation. The Bellman equation is:
+#
+# $$Q(s, a) = r + \gamma \max_{a'} Q(s', a')$$
+#
+# Where $s$ is the current state, $a$ is the current action, $r$ is the observed reward, $s'$ is the observed next state, and $a'$ is the predicted next action, which we will get by argmaxing over all predicted action values among the next state $s'$, using $argmax_{a'}{Q(s', a')}$. $\gamma$ is the discount factor, which is a number between 0 and 1 that determines how much to value future rewards.
+#
+# This is very similar to $R(\tau)$ in REINFORCE, which is calculated along trajectories `continuing_education.policy_gradient_methods.reinforce.cumulative_discounted_future_rewards`. The difference is that in Q Learning, we are using the Q function to predict the future reward, rather than summing the rewards along the trajectory. This again gives us much better sample efficiency.
 
 # %%
 from torch import Tensor
@@ -201,69 +225,33 @@ def objective(
     gamma: float,
 ) -> Tensor:
     """The objective function for the DQN algorithm is simple regression loss."""
-    states = (
-        torch.tensor([s.state for s in batch]).float().to(DEVICE)
-    )  # shape (batch_size, state_size)
-    assert (
-        states.shape[1] == value_network.state_size
-    ), "The state size of the value network should match the state size of the batch"
-    actions = (
-        torch.tensor([s.action for s in batch]).long().to(DEVICE).unsqueeze(1)
-    )  # shape (batch_size, 1)
-    assert actions.shape[1] == 1, "The action should be a scalar value"
-    rewards = (
-        torch.tensor([s.reward for s in batch]).float().to(DEVICE).unsqueeze(1)
-    )  # shape (batch_size, 1)
-    assert rewards.shape[1] == 1, "The reward should be a scalar value"
-    next_states = (
-        torch.tensor([s.next_state for s in batch]).float().to(DEVICE)
-    )  # shape (batch_size, state_size)
-    assert (
-        next_states.shape[1] == value_network.state_size
-    ), "The state size of the value network should match the state size of the batch"
-    dones = (
-        torch.tensor([s.done for s in batch]).float().to(DEVICE).unsqueeze(1)
-    )  # shape (batch_size, 1)
-    assert dones.shape[1] == 1, "The done should be a scalar value"
+    # shape (batch_size, state_size)
+    states = torch.tensor([s.state for s in batch]).float().to(DEVICE)
+    # shape (batch_size, 1)
+    actions = torch.tensor([s.action for s in batch]).long().to(DEVICE).unsqueeze(1)
+    # shape (batch_size, 1)
+    rewards = torch.tensor([s.reward for s in batch]).float().to(DEVICE).unsqueeze(1)
+    # shape (batch_size, state_size)
+    next_states = torch.tensor([s.next_state for s in batch]).float().to(DEVICE)
+    # shape (batch_size, 1)
+    dones = torch.tensor([s.done for s in batch]).float().to(DEVICE).unsqueeze(1)
 
     # We are going to use the value network to predict the Q values for the current state
-    predicted_q_values = value_network.forward(
-        states
-    )  # shape (batch_size, action_size)
-    assert predicted_q_values.shape[0] == len(
-        batch
-    ), "The first dimension of the output should match the batch size"
-    assert (
-        predicted_q_values.shape[1] == value_network.action_size
-    ), "The output of the network should be the same size as the action space"
+    # shape (batch_size, action_size)
+    predicted_q_values = value_network.forward(states)
 
     # We are going to use the value network to predict the Q values for the next state
-    next_predicted_q_values = value_network.forward(
-        next_states
-    )  # shape (batch_size, action_size)
-    assert next_predicted_q_values.shape[0] == len(
-        batch
-    ), "The first dimension of the output should match the batch size"
-    assert (
-        next_predicted_q_values.shape[1] == value_network.action_size
-    ), "The output of the network should be the same size as the action space"
+    # shape (batch_size, action_size)
+    next_predicted_q_values = value_network.forward(next_states)
 
     # Generate the Q Loss using the bellman equation
     # Q(s, a) = r + gamma * max_a'(Q(s', a'))
     next_action_value_predicted = next_predicted_q_values.max(1).values.unsqueeze(1)
     bellman = rewards + gamma * next_action_value_predicted * (1.0 - dones)
-    assert bellman.shape[0] == len(
-        batch
-    ), "The first dimension of the output should match the batch size"
-    assert bellman.shape[1] == 1, "The bellman equation should output a scalar value"
 
     # We predict the Q values for the current state given the actual action, vs the predicted future rewards from the bellman equation
     inp = predicted_q_values.gather(1, actions)
-    assert (
-        inp.shape == bellman.shape
-    ), f"The input and output of the network should have the same shape, got {inp.shape} and {bellman.shape}"
     loss = nn.MSELoss()(inp, bellman)
-    assert loss.shape == (), "The loss should be a scalar value"
 
     return loss
 
@@ -348,6 +336,9 @@ from continuing_education.policy_gradient_methods.reinforce.reinforce import (
 
 if __name__ == "__main__":
     OBSERVATION_SPACE_SHAPE, ACTION_SPACE_SIZE = get_environment_space("CartPole-v1")
+
+# %% [markdown]
+# Lastly, because Q Learning can not learn stochastic policies, we need to incentivize the network to explore during training or else we will not learn a good value function. We do this by adding noise to the action selection during training, and reducing it over time. This is called epsilon greedy exploration. We will start with an epsilon of 1, meaning we will always take a random action, and decay it to 0 exponentially over the course of training. You want to pick a discount factor which converges to 0 just before the end of training usually.
 
 # %%
 import gym
