@@ -9,10 +9,10 @@ Some projects I'm using to learn AI since my MS
         * [ ] Monte-Carlo Methods
         * [ ] $TD(\lambda)$
         * [X] Deep Q Learning
+        * [ ] Prioritized Experience Replay
         * [ ] Double Q Learning
         * [ ] Dueling Q Learning
         * [ ] Multi Step Learning
-        * [ ] Prioritized Experience Replay
         * [ ] Distributional DQN
         * [ ] Noisy Nets
         * [ ] RAINBOW
