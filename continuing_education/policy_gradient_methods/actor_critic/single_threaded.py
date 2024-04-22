@@ -21,7 +21,9 @@
 from pathlib import Path
 
 if __name__ == "__main__":
-    __this_file = Path().resolve() / "actor_critic.ipynb"  # jupyter does not have __file__
+    __this_file = (
+        Path().resolve() / "actor_critic.ipynb"
+    )  # jupyter does not have __file__
 
 # %%
 import torch
@@ -34,7 +36,7 @@ if __name__ == "__main__":
 # %%
 from torch import nn
 
-from continuing_education.policy_gradient_methods.reinforce import collect_episode, SamplePolicy, Action, State
+from continuing_education.policy_gradient_methods.reinforce import SamplePolicy
 
 
 # %% [markdown]
@@ -48,14 +50,20 @@ from continuing_education.policy_gradient_methods.reinforce import collect_episo
 #
 # The huggingface tutorial on A2C wants us to use stable-baselines3, but I call that cheating. We will implement A2C from scratch using PyTorch.
 
+
 # %%
 class Actor(SamplePolicy):
     """This is exactly the same as our SamplePolicy from REINFORCE, but we need to add a few methods."""
+
     def copy(self) -> "Actor":
-        new_actor = Actor(state_size=self.state_size, action_size=self.action_size, hidden_sizes=self.hidden_sizes)
+        new_actor = Actor(
+            state_size=self.state_size,
+            action_size=self.action_size,
+            hidden_sizes=self.hidden_sizes,
+        )
         new_actor.network.load_state_dict(self.network.state_dict())
         return new_actor
-    
+
     def update(self, gradients: list[nn.Module]):
         raise NotImplementedError("Unsure how this works")
 
@@ -65,12 +73,15 @@ from continuing_education.value_based_methods.dqn.dqn import QLearningModel
 
 
 class Critic(QLearningModel):
-
     def copy(self) -> "Critic":
-        new_critic = Critic(state_size=self.state_size, action_size=self.action_size, hidden_sizes=self.hidden_sizes)
+        new_critic = Critic(
+            state_size=self.state_size,
+            action_size=self.action_size,
+            hidden_sizes=self.hidden_sizes,
+        )
         new_critic.network.load_state_dict(self.network.state_dict())
         return new_critic
-    
+
     def update(self, gradients: list[nn.Module]):
         raise NotImplementedError("Unsure how this works")
 
