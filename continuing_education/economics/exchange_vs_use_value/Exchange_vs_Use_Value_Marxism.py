@@ -123,7 +123,7 @@ profit_perspective_of_point_of_sale("x")
 # %%
 delta_non_wage_expenses_B = sp.Eq(
     delta(company("B").non_wage_expenses, units=dollar / company("B").unit),
-    company("A").selling_price,
+    company("A").selling_price * company("A").unit / company("B").unit,
 )
 delta_non_wage_expenses_B
 
@@ -238,7 +238,7 @@ zero_eq
 # So why aren't these equal? It's basically saying that these are equivalent when $-Z_A+\Delta{Z_B}=\Delta{X_B}*\lambda$
 
 # %% [markdown]
-# One way to interpret this is that $\lambda$ (which is a highly speculative variable assuming all labor has a fixed exchange value per unit time) is equal somehow to the difference in the ratio of the price of the machine and the change in labor of the workers in units of final product per machine, and the ratio of the change in the price of the final product over the change in hours of the worker. Take that for what you will, it's a bit complicated for my taste.
+# One way to interpret this is that $\lambda$ (which is a highly speculative variable assuming all labor has a fixed exchange value per unit time) is equal somehow to the difference in the ratio of the price of the machine and the change in labor of the workers in units of final product per machine, and the ratio of the change in the price of the final product over the change in hours of the worker. Take that for what you will, it's a bit complicated for my taste. It could be used in a future theory of machines to derive such a value from data.
 
 # %%
 sp.Eq(lam / (dollar / hour), sp.expand(sp.solve(zero_eq.rhs, lam / (dollar / hour))[0]))
@@ -263,12 +263,25 @@ sp.Eq(
 )
 
 # %% [markdown]
-# This says the marxist definition of profit will be true iff the difference in the labor hours of the employees times the conversion factor into dollars is equal to the difference between the cost of the machine scaled by the ratio of final product per machine (probably ametorized) and the change in price of the final product.
+# This says the marxist definition of profit will be true iff the difference in the labor hours of the employees times the conversion factor into dollars is equal to the difference between the cost of the machine per unit of production and the change in price of the final product.
 #
 # So:
 #
 # * If you increase prices to offset the cost of the machine then you don't need to reduce working hours.
 # * If you reduce working hours to offset the cost of the machine then you don't need to increase prices.
+#
+# There are other solutions:
+#
+# * You could reduce the wage of the workers to offset the cost of the machine, but this should be set by the labor power of the worker, and not be capable of being reduced. See the common terms in `delta_profit_perspective_of_point_of_sale_B_sub` and `delta_profit_perspective_of_surplus_value_B`.
+#
+# Unknown:
+#
+# * Why can't you increase the productive output by adding the machine (not decreasing or increasing labor hours) and pay off the machine with that increase? Why is this not represented in the equations?
+#   * Because we formulated these equations in the context of a change in labor hours, not a change in productive output. This is a limitation of the model. TODO: Formulate it the other way.
+#
+# Other TODOs:
+# * $\lambda$ could be loosened a bit to have a different conversion factor for each company. Different areas of work could have different "value". See what falls out of that model vs the current one.
+# * What is the difference between `use-value - labor-value` as a factor of exploitation vs the more traditional marxist exploitation quantity of labor-value - labor-power? What if I used the product to do as the other capitalist does instead of selling it to them? Would that fit under roemer's exploitation theory?
 
 # %% [markdown]
 # That seems perfectly reasonable. So given the assumptions are true, the surplus value theory of profix is compatible with the capitalist definition of profit.
