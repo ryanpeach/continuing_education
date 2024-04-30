@@ -260,10 +260,10 @@ delta_x_b
 #
 # * If you increase the difference between the wage and the true value of labor, then the labor saving power of the machine is able to be less, because you can extract more profit from the workers to make up for the cost of the machine.
 # * If you decrease the difference between the wage and the true value of labor, then the labor saving power of the machine is has to be more, because you can only extract so much profit from the workers to make up for the cost of the machine.
-# * If you increase the cost of the machine, then the labor saving power of the machine needs to be more to extract the same profit.
-# * If you decrease the cost of the machine, then the labor saving power of the machine needs to be less to extract the same profit.
-# * If you increase the lifespan of the machine in units produced, then the labor saving power of the machine does not need to be as high per unit of production to extract the same profit.
-# * If you decrease the lifespan of the machine in units produced, then the labor saving power of the machine needs to be higher per unit of production to extract the same profit.
+# * If you increase the cost of the machine, then the labor saving power of the machine needs to be more to cancel out the cost.
+# * If you decrease the cost of the machine, then the labor saving power of the machine needs to be less to cancel out the cost.
+# * If you increase the lifespan of the machine in units produced, then the labor saving power of the machine does not need to be as high per unit of production to cancel out the cost.
+# * If you decrease the lifespan of the machine in units produced, then the labor saving power of the machine needs to be higher per unit of production to cancel out the cost.
 #
 # Other Research Questions:
 # * $\lambda$ could be loosened a bit to have a different conversion factor for each company. Different areas of work could have different "value". See what falls out of that model vs the current one.
