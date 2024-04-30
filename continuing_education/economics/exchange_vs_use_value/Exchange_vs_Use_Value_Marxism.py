@@ -281,9 +281,12 @@ sp.Eq(
 # %% [markdown]
 # This says the marxist definition of profit will be true iff the difference in the labor hours of the employees times the conversion factor into dollars is equal to the difference between the cost of the machine scaled by the ratio of final product per machine (probably ametorized) and the change in price of the final product.
 #
-# So if you increase prices to
+# So:
+#
+# * If you increase prices to offset the cost of the machine then you don't need to reduce working hours.
+# * If you reduce working hours to offset the cost of the machine then you don't need to increase prices.
 
 # %% [markdown]
-# That seems in line with marxist theory. So given the assumptions are true, the surplus value theory of profix is compatible with the capitalist definition of profit.
+# That seems perfectly reasonable. So given the assumptions are true, the surplus value theory of profix is compatible with the capitalist definition of profit.
 
 # %%
