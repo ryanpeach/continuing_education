@@ -33,11 +33,12 @@ sp.init_printing()
 # * The **non wage expenses (constant capital)** of company x is $I_x$ measured in dollars per unit of production.
 # * The **selling price (exchange value)** for the final product in company x is $Z_x$ measured in dollars per unit of production.
 # * The **profit** for company x is $K_x$ measured in dollars per unit of production
-# * Assume A produces a machine which when bought by B has a **labor saving power (use value)** of $\Delta{X_B}$ hours per unit of production.
+# * Assume A produces a machine which when bought by B has a **labor saving power (use value)** of $\Delta{X_B}$ hours per unit of production B. There is only one machine in the world at a time (this prevents needing to calculate the labor savings of N machines). One machine can produce P units of production B in its lifetime.
 
 # %%
 dollar = Unit("\$")
-dollar
+unit = sp.Symbol("unit_B")
+dollar, unit
 
 # %%
 from collections import namedtuple
@@ -58,9 +59,7 @@ Company = namedtuple(
         "wage",
         "selling_price",
         "non_wage_expenses",
-        "labor_saving_value",
         "profit",
-        "unit",
     ],
 )
 
@@ -68,27 +67,27 @@ Company = namedtuple(
 @cache
 def company(x: str) -> Company:
     Xx, Yx, Zx, Ix, Kx = sp.symbols(f"X_{x}, Y_{x}, Z_{x}, I_{x}, K_{x}")
-    unit = sp.Symbol(f"unit_{x}")
-    labor_time = Xx * hour / unit
+    unit_ = 1 if x == "A" else unit
+    labor_time = Xx * hour / unit_
     wage = Yx * dollar / hour
-    selling_price = Zx * dollar / unit
-    non_wage_expenses = Ix * dollar / unit
-    labor_saving_value = delta(Xx * hour / unit, units=hour / unit)
-    profit = Kx * dollar / unit
+    selling_price = Zx * dollar / unit_
+    non_wage_expenses = Ix * dollar / unit_
+    profit = Kx * dollar / unit_
     return Company(
         labor_time,
         wage,
         selling_price,
         non_wage_expenses,
-        labor_saving_value,
         profit,
-        unit,
     )
 
 
 # %%
-tuple(company("x"))
+tuple(company("A"))
 
+
+# %%
+tuple(company("B"))
 
 # %% [markdown]
 # # Definitions
@@ -102,7 +101,7 @@ def total_cost_of_production(x: str):
     return comp.wage * comp.labor_time + comp.non_wage_expenses
 
 
-total_cost_of_production("x")
+total_cost_of_production("A"), total_cost_of_production("B")
 
 
 # %% [markdown]
@@ -115,15 +114,15 @@ def profit_perspective_of_point_of_sale(x: str):
     return sp.Eq(comp.profit, comp.selling_price - total_cost_of_production(x))
 
 
-profit_perspective_of_point_of_sale("x")
+profit_perspective_of_point_of_sale("A"), profit_perspective_of_point_of_sale("B")
 
 # %% [markdown]
 # 3. The difference between the non wage cost of production for company B before the machine and the non wage cost of production after the machine is equal to the cost of the machine (sold by company A)
 
 # %%
 delta_non_wage_expenses_B = sp.Eq(
-    delta(company("B").non_wage_expenses, units=dollar / company("B").unit),
-    company("A").selling_price * company("A").unit / company("B").unit,
+    delta(company("B").non_wage_expenses, units=dollar / unit),
+    company("A").selling_price / (sp.Symbol("P") * unit),
 )
 delta_non_wage_expenses_B
 
@@ -167,9 +166,9 @@ profit_perspective_of_surplus_value("x")
 
 # %%
 def delta_total_cost_of_production(x: str):
-    # Relative to change in change in total cost of production
+    # Relative to change in non-wage expenses
     comp = company(x)
-    return delta(comp.non_wage_expenses, units=dollar / comp.unit)
+    return delta(comp.non_wage_expenses, units=dollar / unit)
 
 
 delta_total_cost_of_production("x")
@@ -177,10 +176,10 @@ delta_total_cost_of_production("x")
 
 # %%
 def delta_profit_perspective_of_point_of_sale(x: str):
-    # Relative to change in change in total cost of production
+    # Relative to change in non-wage expenses
     comp = company(x)
     return sp.Eq(
-        delta(comp.profit, units=dollar / comp.unit),
+        delta(comp.profit, units=dollar / unit),
         -delta_total_cost_of_production(x),
     )
 
@@ -195,8 +194,8 @@ B = company("B")
 delta_profit_perspective_of_point_of_sale_B_sub = sp.Eq(
     delta_profit_perspective_of_point_of_sale("B").lhs,
     delta_profit_perspective_of_point_of_sale("B").rhs.subs(
-        delta_non_wage_expenses_B.lhs / dollar * B.unit,
-        delta_non_wage_expenses_B.rhs / dollar * B.unit,
+        delta_non_wage_expenses_B.lhs / dollar * unit,
+        delta_non_wage_expenses_B.rhs / dollar * unit,
     ),
 )
 delta_profit_perspective_of_point_of_sale_B_sub
@@ -204,12 +203,13 @@ delta_profit_perspective_of_point_of_sale_B_sub
 
 # %%
 def delta_profit_perspective_of_surplus_value(x: str):
+    # Relative to change in labor time
     comp = company(x)
     return sp.Eq(
-        delta(comp.profit, units=dollar / comp.unit),
+        delta(comp.profit, units=dollar / unit),
         sp.expand(
-            delta(comp.labor_time, units=hour / comp.unit) * lam
-            - comp.wage * delta(comp.labor_time, units=hour / comp.unit)
+            delta(comp.labor_time, units=hour / unit) * lam
+            - comp.wage * delta(comp.labor_time, units=hour / unit)
         ),
     )
 
@@ -220,9 +220,11 @@ delta_profit_perspective_of_surplus_value_B = delta_profit_perspective_of_surplu
 delta_profit_perspective_of_surplus_value_B
 
 # %% [markdown]
-# Now take the difference of these two interpretations of delta profit.
+# Take the difference of the right hand side of both.
 #
-# This says the price of the machine plus the the change in labor converted to dollars per unit minus the change in the sale price of the final good is zero.
+# Because we did these differentials differently, taking their difference will relate them by what varies between them.
+#
+# In this case we are specifically interested in relating the change in non-wage expenses to the change in labor time, from the perspective of the marxist theory of value.
 
 # %%
 zero_eq = sp.Eq(
@@ -234,10 +236,7 @@ zero_eq = sp.Eq(
 zero_eq
 
 # %% [markdown]
-# So why aren't these equal? It's basically saying that these are equivalent when $-Z_A+\Delta{Z_B}=\Delta{X_B}*\lambda$
-
-# %% [markdown]
-# One way to interpret this is that $\lambda$ (which is a highly speculative variable assuming all labor has a fixed exchange value per unit time) is equal somehow to the difference in the ratio of the price of the machine and the change in labor of the workers in units of final product per machine, and the ratio of the change in the price of the final product over the change in hours of the worker. Take that for what you will, it's a bit complicated for my taste. It could be used in a future theory of machines to derive such a value from data.
+# One way to interpret this is that $\lambda$ (which is a highly speculative variable assuming all labor has a fixed exchange value per unit time) is equal to the difference between the wage and the ratio of the price of the machine to the labor saving power of the machine.
 
 # %%
 sp.Eq(lam / (dollar / hour), sp.expand(sp.solve(zero_eq.rhs, lam / (dollar / hour))[0]))
@@ -247,8 +246,10 @@ sp.Eq(lam / (dollar / hour), sp.expand(sp.solve(zero_eq.rhs, lam / (dollar / hou
 
 # %%
 delta_x_b = sp.Eq(
-    company("B").labor_saving_value / (hour / B.unit),
-    sp.expand(sp.solve(zero_eq, company("B").labor_saving_value / (hour / B.unit))[0]),
+    delta(company("B").labor_time, units=hour / unit) * unit / hour,
+    sp.solve(zero_eq, delta(company("B").labor_time, units=hour / unit) * unit / hour)[
+        0
+    ],
 )
 delta_x_b
 
@@ -261,6 +262,8 @@ delta_x_b
 # * If you decrease the difference between the wage and the true value of labor, then the labor saving power of the machine is has to be more, because you can only extract so much profit from the workers to make up for the cost of the machine.
 # * If you increase the cost of the machine, then the labor saving power of the machine needs to be more to extract the same profit.
 # * If you decrease the cost of the machine, then the labor saving power of the machine needs to be less to extract the same profit.
+# * If you increase the lifespan of the machine in units produced, then the labor saving power of the machine does not need to be as high per unit of production to extract the same profit.
+# * If you decrease the lifespan of the machine in units produced, then the labor saving power of the machine needs to be higher per unit of production to extract the same profit.
 #
 # Other Research Questions:
 # * $\lambda$ could be loosened a bit to have a different conversion factor for each company. Different areas of work could have different "value". See what falls out of that model vs the current one.
@@ -268,5 +271,3 @@ delta_x_b
 
 # %% [markdown]
 # That seems perfectly reasonable. So given the assumptions are true, the surplus value theory of profix is compatible with the capitalist definition of profit.
-
-# %%
