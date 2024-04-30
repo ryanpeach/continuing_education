@@ -167,10 +167,9 @@ profit_perspective_of_surplus_value("x")
 
 # %%
 def delta_total_cost_of_production(x: str):
+    # Relative to change in change in total cost of production
     comp = company(x)
-    return comp.wage * delta(comp.labor_time, units=hour / comp.unit) + delta(
-        comp.non_wage_expenses, units=dollar / comp.unit
-    )
+    return delta(comp.non_wage_expenses, units=dollar / comp.unit)
 
 
 delta_total_cost_of_production("x")
@@ -178,11 +177,11 @@ delta_total_cost_of_production("x")
 
 # %%
 def delta_profit_perspective_of_point_of_sale(x: str):
+    # Relative to change in change in total cost of production
     comp = company(x)
     return sp.Eq(
         delta(comp.profit, units=dollar / comp.unit),
-        delta(comp.selling_price, units=dollar / comp.unit)
-        - delta_total_cost_of_production(x),
+        -delta_total_cost_of_production(x),
     )
 
 
@@ -254,32 +253,16 @@ delta_x_b = sp.Eq(
 delta_x_b
 
 # %% [markdown]
-# Moving lambda to the left for ease of reading
-
-# %%
-sp.Eq(
-    delta_x_b.lhs * lam * (hour / dollar),
-    sp.simplify(delta_x_b.rhs * lam * (hour / dollar)),
-)
-
-# %% [markdown]
-# This says the marxist definition of profit will be true iff the difference in the labor hours of the employees times the conversion factor into dollars is equal to the difference between the cost of the machine per unit of production and the change in price of the final product.
+# This says the marxist definition of profit will be true iff the difference in the labor saving hours of the machine is equal to the ratio of the cost of the machine per unit of production and the difference between wages and real value of labor.
 #
 # So:
 #
-# * If you increase prices to offset the cost of the machine then you don't need to reduce working hours.
-# * If you reduce working hours to offset the cost of the machine then you don't need to increase prices.
+# * If you increase the difference between the wage and the true value of labor, then the labor saving power of the machine is able to be less, because you can extract more profit from the workers to make up for the cost of the machine.
+# * If you decrease the difference between the wage and the true value of labor, then the labor saving power of the machine is has to be more, because you can only extract so much profit from the workers to make up for the cost of the machine.
+# * If you increase the cost of the machine, then the labor saving power of the machine needs to be more to extract the same profit.
+# * If you decrease the cost of the machine, then the labor saving power of the machine needs to be less to extract the same profit.
 #
-# There are other solutions:
-#
-# * You could reduce the wage of the workers to offset the cost of the machine, but this should be set by the labor power of the worker, and not be capable of being reduced. See the common terms in `delta_profit_perspective_of_point_of_sale_B_sub` and `delta_profit_perspective_of_surplus_value_B`.
-#
-# Unknown:
-#
-# * Why can't you increase the productive output by adding the machine (not decreasing or increasing labor hours) and pay off the machine with that increase? Why is this not represented in the equations?
-#   * Because we formulated these equations in the context of a change in labor hours, not a change in productive output. This is a limitation of the model. TODO: Formulate it the other way.
-#
-# Other TODOs:
+# Other Research Questions:
 # * $\lambda$ could be loosened a bit to have a different conversion factor for each company. Different areas of work could have different "value". See what falls out of that model vs the current one.
 # * What is the difference between `use-value - labor-value` as a factor of exploitation vs the more traditional marxist exploitation quantity of labor-value - labor-power? What if I used the product to do as the other capitalist does instead of selling it to them? Would that fit under roemer's exploitation theory?
 
