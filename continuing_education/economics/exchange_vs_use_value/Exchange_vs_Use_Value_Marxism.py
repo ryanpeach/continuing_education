@@ -267,6 +267,7 @@ delta_x_b
 #
 # Other Research Questions:
 # * $\lambda$ could be loosened a bit to have a different conversion factor for each company. Different areas of work could have different "value". See what falls out of that model vs the current one.
+# * You can get rid of lambda and just use wage if you do not believe in LtV. The point of sale equation can be differentiated along the change in labor time dimension to eliminate the $-\lambda$ term in the final result.
 # * What is the difference between `use-value - labor-value` as a factor of exploitation vs the more traditional marxist exploitation quantity of labor-value - labor-power? What if I used the product to do as the other capitalist does instead of selling it to them? Would that fit under roemer's exploitation theory?
 
 # %% [markdown]
