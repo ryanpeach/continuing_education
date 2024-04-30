@@ -159,23 +159,6 @@ def profit_perspective_of_surplus_value(x: str):
 profit_perspective_of_surplus_value("x")
 
 # %% [markdown]
-# 3. Production capacity remains constant.
-#
-# Under this assumption, we can derive that the labor saved by the machine will equal the labor cut (fired) by the capitalist.
-
-# %%
-B = company("B")  # Since only company B uses the machine
-
-# %%
-labor_cut_by_B = B.labor_saving_value
-labor_cut_by_B
-
-# %%
-new_labor_time_B = B.labor_time - labor_cut_by_B
-new_labor_time_B
-
-
-# %% [markdown]
 # # Methodology
 
 # %% [markdown]
@@ -209,6 +192,7 @@ delta_profit_perspective_of_point_of_sale("B")
 # Substitute out that $\Delta{I_B}$ using Equality #3
 
 # %%
+B = company("B")
 delta_profit_perspective_of_point_of_sale_B_sub = sp.Eq(
     delta_profit_perspective_of_point_of_sale("B").lhs,
     delta_profit_perspective_of_point_of_sale("B").rhs.subs(
