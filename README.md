@@ -42,6 +42,12 @@ Some projects I'm using to learn AI since my MS
     * Profiling
     * Debugging Metrics
 
+## Other interests slightly related
+
+* linguistic philosophy 
+* cognitive science
+* economics and game theory
+
 ## Sources for further work
 
 * [Key Papers in Deep RL](https://spinningup.openai.com/en/latest/spinningup/keypapers.html)
