@@ -230,10 +230,7 @@ sp.Eq(
 )
 
 # %% [markdown]
-#
-# So:
-#
-#
+# Not going to provide an interpretation until I'm confident in this derivation.
 #
 # Other Research Questions:
 # * $\lambda$ could be loosened a bit to have a different conversion factor for each company. Different areas of work could have different "value". See what falls out of that model vs the current one.
