@@ -117,9 +117,10 @@ step1 = answer_q3.lhs + c < answer_q3.rhs + c
 step1
 
 # %%
-# Since T_corn(hoe) is a positive factor, it does not effect the inequality, we can cancel it out
-step2 = step1.subs(T_corn_of_hoe * hoe / corn, 1)
+# Move constants to the left. T_corn(hoe) is positive, so we don't flip the inequality
+c = T_corn_of_hoe * hoe / corn
+step2 = sp.simplify(step1.lhs / c < step1.rhs / c)
 step2
 
 # %% [markdown]
-# There you have it, the hoe saves more labor than the labor it took to create it iff the difference in corn production time is at least 2 times the hoe production time. The farmer would not produce the hoe otherwise, given "He prefers to spend as little time working as possible."
+# There you have it, the hoe saves more labor than the labor it took to create it iff the difference in corn production time is greater than $2/T_{corn}(hoe)$ times the hoe production time. $T_{corn}(hoe)$ is a large number, making the right side of this inequality very small, almost always certain to be true. Also, the farmer would not produce the hoe otherwise, given "He prefers to spend as little time working as possible."
