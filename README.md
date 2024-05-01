@@ -44,7 +44,9 @@ Some projects I'm using to learn AI since my MS
 
 ## Other interests slightly related
 
-* linguistic philosophy 
+* linguistic philosophy
+  * [ ] Wittgenstein
+  * [ ] Chompsky
 * cognitive science
 * economics and game theory
 
