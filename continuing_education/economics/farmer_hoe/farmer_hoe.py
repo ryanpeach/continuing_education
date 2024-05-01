@@ -27,7 +27,7 @@ sp.init_printing()
 # %% [markdown]
 # # Farmer + Hoe Thought Experiment
 #
-# Assume there is a farmer which can do one of three things each with different labor times under different conditions:
+# Assume there is a farmer which can do one of two things each with different labor times under different conditions:
 #
 # 1. Produce a hoe
 # 2. Farm land to produce corn
@@ -60,9 +60,7 @@ L_0_of_hoe, L_0_of_corn, L_hoe_of_corn, T_corn_of_hoe
 # %% [markdown]
 # ## Assumptions
 #
-# 1. ~~The farmer needs 1 corn per $D$ where D<L_0(corn)~~ Was unneded
-# 2. One x is produced per $L(x)$ (no sub necessary, it applies to both)
-# 3. $L_m(x) < L_0(x)$ (MoP always saves time)
+# 1. $L_m(x) < L_0(x)$ (MoP always saves time)
 
 # %% [markdown]
 # # First Experiment
@@ -78,7 +76,7 @@ first_experiment_labor_time
 # %% [markdown]
 # # Second Experiment
 #
-# Second lets find the quantity of total labor time of the farmer in the same amount of living time as the first experiment.
+# Second lets find the quantity of total labor time of the farmer in the same amount of living time as the first experiment. This is simply the time it takes to produce corn without a hoe $L_0(corn)$ multiplied by the same quantity of corn produced in the first experiment $T_{corn}(hoe)$.
 
 # %%
 second_experiment_labor_time = sp.simplify(L_0_of_corn * T_corn_of_hoe)
