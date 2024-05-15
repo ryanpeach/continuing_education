@@ -35,6 +35,7 @@ Some projects I'm using to learn AI since my MS
     * [ ] Multimodality
 * [ ] Diffusion Models
 * [ ] Graph Neural Networks (GNN)
+* [ ] Predictive Coding Models
 * Techniques
     * Distribution
         * [ ] pytorch.distributed
