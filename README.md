@@ -4,11 +4,13 @@ Some projects I'm using to learn AI since my MS
 
 # TODO
 
+`*` Means priority
+
 * Reinforcement Learning
     * Value Based Methods - I'm pretty much up to date with these methods, but might as well implement them. I may go into less explanation though.
         * [ ] Monte-Carlo Methods
         * [ ] $TD(\lambda)$
-        * [X] Deep Q Learning
+        * [X] Deep Q Learning *
         * [ ] Prioritized Experience Replay
         * [ ] Double Q Learning
         * [ ] Dueling Q Learning
@@ -17,25 +19,24 @@ Some projects I'm using to learn AI since my MS
         * [ ] Noisy Nets
         * [ ] RAINBOW
     * Policy Based Methods
-        * [X] REINFORCE
-        * [ ] Actor-Critic
-        * [ ] Proximal Policy Optimization (PPO)
+        * [X] REINFORCE *
+        * [ ] Actor-Critic *
+        * [ ] Proximal Policy Optimization (PPO) *
     * Model Based Reinforcement Learning
         * [ ] AlphaZero
     * [ ] Exploration in RL
     * Multi Agent RL
-        * [ ] Emergent Communication through Negotiation https://arxiv.org/abs/1804.03980
+        * [ ] [Emergent Communication through Negotiation](https://arxiv.org/abs/1804.03980)
 * Transformers
-    * [ ] Tokenization
-    * [ ] Word Embeddings
-    * [ ] Transformers
-    * [ ] Fine Tuning
-    * [ ] RLHF
+    * [ ] Tokenization *
+    * [ ] Word Embeddings *
+    * [ ] Transformers *
+    * [ ] Fine Tuning *
+    * [ ] RLHF *
     * [ ] Self Implemented LLM
     * [ ] Multimodality
 * [ ] Diffusion Models
 * [ ] Graph Neural Networks (GNN)
-* [ ] Predictive Coding Models
 * Techniques
     * Distribution
         * [ ] pytorch.distributed
@@ -49,7 +50,9 @@ Some projects I'm using to learn AI since my MS
   * [ ] Wittgenstein
   * [ ] Chompsky
 * cognitive science
+  * [ ] Predictive Coding Models
 * economics and game theory
+  * [ ] Von Neuman
 
 ## Sources for further work
 
