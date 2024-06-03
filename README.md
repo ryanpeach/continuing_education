@@ -52,7 +52,7 @@ Some projects I'm using to learn AI since my MS
 * cognitive science
   * [ ] Predictive Coding Models
 * economics and game theory
-  * [ ] Von Neuman
+  * [ ] https://web.stanford.edu/~jacksonm/Networks-Online-Syllabus.pdf
 
 ## Sources for further work
 
