@@ -28,13 +28,12 @@ Some projects I'm using to learn AI since my MS
     * Multi Agent RL
         * [ ] [Emergent Communication through Negotiation](https://arxiv.org/abs/1804.03980)
 * Transformers
-    * [ ] Tokenization *
-    * [ ] Word Embeddings *
-    * [ ] Transformers *
-    * [ ] Fine Tuning *
-    * [ ] RLHF *
-    * [ ] Self Implemented LLM
-    * [ ] Multimodality
+    * [ ] Tokenization - https://huggingface.co/learn/nlp-course/en/chapter6/1?fw=pt
+    * [ ] Word Embeddings - https://pytorch.org/tutorials/beginner/nlp/word_embeddings_tutorial.html
+    * [ ] Transformers - https://pytorch.org/tutorials/beginner/transformer_tutorial.html
+    * [ ] Fine Tuning - https://huggingface.co/learn/nlp-course/en/chapter3/1?fw=pt
+    * [ ] RLHF - https://huggingface.co/blog/the_n_implementation_details_of_rlhf_with_ppo
+    * [ ] Multimodality - https://lightning.ai/docs/pytorch/stable/notebooks/course_UvA-DL/11-vision-transformer.html
 * [ ] Diffusion Models
 * [ ] Graph Neural Networks (GNN)
 * Techniques
