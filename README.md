@@ -10,7 +10,8 @@ Some projects I'm using to learn AI since my MS
     * Value Based Methods - I'm pretty much up to date with these methods, but might as well implement them. I may go into less explanation though.
         * [ ] Monte-Carlo Methods
         * [ ] $TD(\lambda)$
-        * [X] Deep Q Learning *
+        * [X] Deep Q Learning
+          * https://lightning.ai/docs/pytorch/LTS/notebooks/lightning_examples/reinforce-learning-DQN.html
         * [ ] Prioritized Experience Replay
         * [ ] Double Q Learning
         * [ ] Dueling Q Learning
@@ -27,6 +28,7 @@ Some projects I'm using to learn AI since my MS
     * [ ] Exploration in RL
     * Multi Agent RL
         * [ ] [Emergent Communication through Negotiation](https://arxiv.org/abs/1804.03980)
+        * [ ] https://lightning.ai/docs/pytorch/LTS/notebooks/lightning_examples/warp-drive.html
 * Transformers
     * [ ] Tokenization - https://huggingface.co/learn/nlp-course/en/chapter6/1?fw=pt
     * [ ] Word Embeddings - https://pytorch.org/tutorials/beginner/nlp/word_embeddings_tutorial.html
