@@ -27,8 +27,18 @@
             - It's a maximization rather than a loss
             - But very similar to the REINFORCE scoring function
     - $J(\theta)$: The objective function
+- What is the training loop for [[REINFORCE]]? #card
+    - Initialize the policy $\pi_{\theta}$ with random weights
+    - For each episode:
+        - Generate a trajectory $\tau$ by following the policy $\pi_{\theta}$
+        - Compute the return $R(\tau)$
+        - Compute the policy gradient $\nabla_{\theta} J(\theta)$
+        - Update the policy parameters $\theta$ with the gradient
 - What is $\pi_{\theta}(a | s)$? #card
+    - The function which is learned by the [[REINFORCE]] algorithm
     - The probability of taking action $a$ in state $s$ under [[policy]] $\pi_{\theta}$
+- Why do you need to normalize the rewards in [[REINFORCE]]? #card
+    - Since the rewards are arbitrary and directly part of the objective/loss function, they are normalized to make the optimization more stable.
 - What is a multinomial [[distribution]]? #card
     - A [[probability]] distribution over a discrete number of possible outcomes, where each outcome has a probability associated with it. Like a dice roll, where each face has a probability of being rolled.
 - What are some advantages of [[policy gradient]] methods over value-based methods? #card
