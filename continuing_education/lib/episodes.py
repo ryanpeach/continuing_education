@@ -21,6 +21,9 @@ class SARSA:
     next_action: Action | None = None
     action_log_prob: LogProb = LogProb(tensor(0.0))
 
+    def to_sars(self) -> "SARS":
+        return SARS.from_sarsa(self)
+
 
 def collect_episode(
     *, env: Env, policy: DiscreteActionPolicyInterface, max_t: int, **policy_kwargs
@@ -51,3 +54,22 @@ def collect_episode(
 
         assert next_action is not None
         state, action, action_logprob = next_state, next_action, next_action_logprob
+
+
+@dataclass
+class SARS:
+    state: State
+    action: Action
+    reward: float
+    next_state: State
+    done: bool
+
+    @staticmethod
+    def from_sarsa(sarsa: SARSA) -> "SARS":
+        return SARS(
+            state=sarsa.state,
+            action=sarsa.action,
+            reward=sarsa.reward,
+            next_state=sarsa.next_state,
+            done=sarsa.done,
+        )

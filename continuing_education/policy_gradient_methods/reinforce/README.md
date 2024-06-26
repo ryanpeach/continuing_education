@@ -51,6 +51,8 @@
         - Catastrophic forgetting
     - They can be sensitive to the choice of step size
     - They can be computationally expensive
+- Does [[REINFORCE]] use SAR, SARS, or SARSA? Any extra terms? #card
+    - SAR with an extra log probability term
 - What is the softmax equation with temperature? #card
     - $P(i) = \frac{e^{Z_i/T}}{\sum_{j} e^{Z_j/T}}$
     - $P(i)$: The probability of outcome $i$

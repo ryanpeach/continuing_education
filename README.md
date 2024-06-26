@@ -21,10 +21,16 @@ Some projects I'm using to learn AI since my MS
         * [ ] RAINBOW
     * Policy Based Methods
         * [X] REINFORCE *
-        * [ ] Actor-Critic *
-        * [ ] Trust Region Policy Optimization (TRPO) 
+        * Actor-Critic
+            * [X] A2C *
+            * [ ] A3C
+        * [ ] Off policy Policy Gradient
+          * https://medium.com/intro-to-artificial-intelligence/off-policy-policy-gradient-reinforcement-learning-algorithms-106bd67890f9
+          * https://samuelebolotta.medium.com/2-deep-reinforcement-learning-policy-gradients-5a416a99700a
+        * [ ] Trust Region Policy Optimization (TRPO)
         * [ ] Proximal Policy Optimization (PPO) *
-        * [ ] Deep Deterministic Policy Gradient (DDPG) 
+        * [ ] Soft Actor Critic (SAC)
+        * [ ] Deep Deterministic Policy Gradient (DDPG)
     * Model Based Reinforcement Learning
         * [ ] AlphaZero
     * [ ] Exploration in RL
