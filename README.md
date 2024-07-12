@@ -46,6 +46,7 @@ Some projects I'm using to learn AI since my MS
     * [ ] [Mamba and SSM's](https://towardsdatascience.com/mamba-ssm-theory-and-implementation-in-keras-and-tensorflow-32d6d4b32546)
     * [ ] [Sentence Transformers](https://medium.com/@vipra_singh/building-llm-applications-sentence-transformers-part-3-a9e2529f99c1)
     * [ ] [Multi token prediction](https://arxiv.org/pdf/2404.19737)
+    * [ ] Time Series https://www.datadoghq.com/blog/datadog-time-series-foundation-model/
 * [ ] Diffusion Models
   * https://lightning.ai/lightning-community-labs/studios/build-diffusion-models-with-pytorch-lightning-hf-diffusers
 * [ ] Graph Neural Networks (GNN)
