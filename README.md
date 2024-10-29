@@ -75,6 +75,7 @@ Some projects I'm using to learn AI since my MS
   * [ ] Chompsky
 * cognitive science
   * [ ] Predictive Coding Models
+  * [ ] Liquid Neural Networks
 * economics and game theory
   * [ ] https://web.stanford.edu/~jacksonm/Networks-Online-Syllabus.pdf
 
