@@ -36,6 +36,8 @@ Some projects I'm using to learn AI since my MS
         * [Robust PLR](https://arxiv.org/pdf/2110.02439)
         * Similar Model Based RL and Meta RL:
           * [Dreamer](https://research.google/blog/introducing-dreamer-scalable-reinforcement-learning-using-world-models/)
+          * [Efficient Zero](https://arxiv.org/abs/2111.00210)
+          * [Efficient Zero V2](https://arxiv.org/abs/2403.00564)
     * Distributed RL
         * [ ] [Survey](https://arxiv.org/pdf/2011.11012)
         * [ ] [RLLib](https://docs.ray.io/en/master/rllib.html)
