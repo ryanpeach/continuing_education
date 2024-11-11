@@ -30,6 +30,12 @@ Some projects I'm using to learn AI since my MS
     * Multi Agent RL
         * [ ] [Emergent Communication through Negotiation](https://arxiv.org/abs/1804.03980)
         * [ ] [Warp Drive](https://lightning.ai/docs/pytorch/LTS/notebooks/lightning_examples/warp-drive.html)
+    * [Human-Timescale Adaptation in an Open-Ended Task Space](https://sites.google.com/view/adaptive-agent/)
+        * [Muesli](https://arxiv.org/pdf/2104.06159)
+        * [Transformer-XL](https://arxiv.org/abs/1901.02860)
+        * [Robust PLR](https://arxiv.org/pdf/2110.02439)
+        * Similar Model Based RL and Meta RL:
+          * [Dreamer](https://research.google/blog/introducing-dreamer-scalable-reinforcement-learning-using-world-models/)
     * Distributed RL
         * [ ] [Survey](https://arxiv.org/pdf/2011.11012)
         * [ ] [RLLib](https://docs.ray.io/en/master/rllib.html)
