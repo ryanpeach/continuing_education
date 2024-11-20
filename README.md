@@ -71,7 +71,10 @@ Some projects I'm using to learn AI since my MS
   * https://lightning.ai/lightning-community-labs/studios/build-diffusion-models-with-pytorch-lightning-hf-diffusers
 * [ ] Graph Neural Networks (GNN) *
   * https://lightning.ai/docs/pytorch/stable/notebooks/course_UvA-DL/06-graph-neural-networks.html
-* [ ] [Conformal Prediction](https://blog.dataiku.com/measuring-models-uncertainty-conformal-prediction?utm_source=pocket_saves)
+* Cognitive Science
+   * [ ] [Hopfield Network](https://www.youtube.com/watch?v=1WPJdAW-sFo)
+   * [ ] [Boltzman Machine](https://www.youtube.com/watch?v=_bqa_I5hNAo)
+   * [ ] [Conformal Prediction](https://blog.dataiku.com/measuring-models-uncertainty-conformal-prediction?utm_source=pocket_saves)
 * Techniques
     * Profiling
     * Debugging Metrics
