@@ -27,6 +27,7 @@ Some projects I'm using to learn AI since my MS
     * Model Based Reinforcement Learning
         * [ ] AlphaZero
         * [ ] MuZero
+        * [ ] SIMA and Genie 2
     * [ ] Exploration in RL
     * Multi Agent RL
         * [ ] [Emergent Communication through Negotiation](https://arxiv.org/abs/1804.03980)
