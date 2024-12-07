@@ -26,6 +26,7 @@ Some projects I'm using to learn AI since my MS
         * [ ] Deep Deterministic Policy Gradient (DDPG)
     * Model Based Reinforcement Learning
         * [ ] AlphaZero
+        * [ ] MuZero
     * [ ] Exploration in RL
     * Multi Agent RL
         * [ ] [Emergent Communication through Negotiation](https://arxiv.org/abs/1804.03980)
