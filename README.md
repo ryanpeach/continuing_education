@@ -53,6 +53,7 @@ Some projects I'm using to learn AI since my MS
     * [ ] Sentence-BERT *
     * [ ] [Fine Tuning](https://huggingface.co/learn/nlp-course/en/chapter3/1?fw=pt)
     * [ ] [RLHF](https://huggingface.co/blog/the_n_implementation_details_of_rlhf_with_ppo)
+    * [ ] [Direct Preference Optimization](https://arxiv.org/pdf/2305.18290)
     * [ ] [Multimodality](https://lightning.ai/docs/pytorch/stable/notebooks/course_UvA-DL/11-vision-transformer.html)
     * [ ] [Mamba and SSM's](https://towardsdatascience.com/mamba-ssm-theory-and-implementation-in-keras-and-tensorflow-32d6d4b32546)
     * [ ] [Sentence Transformers](https://medium.com/@vipra_singh/building-llm-applications-sentence-transformers-part-3-a9e2529f99c1)
