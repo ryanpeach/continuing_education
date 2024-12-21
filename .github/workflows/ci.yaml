@@ -20,13 +20,10 @@ jobs:
       - name: Install Just
         uses: extractions/setup-just@v2
 
-      - name: Install poetry
-        uses: abatilo/actions-poetry@v2
-
-      - name: Setup a local virtual environment (if no poetry.toml file)
-        run: |
-          poetry config virtualenvs.create true --local
-          poetry config virtualenvs.in-project true --local
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
 
       - uses: actions/cache@v3
         name: Define a cache for the virtual environment based on the dependencies lock file
@@ -35,10 +32,10 @@ jobs:
           key: venv-${{ hashFiles('poetry.lock') }}
 
       - name: Install the project dependencies
-        run: poetry install
+        run: uv sync
 
       - name: Install pytorch cpu
-        run: poetry run pip install torch==2.2.2 --index-url https://download.pytorch.org/whl/cpu
+        run: uv run pip install torch==2.2.2 --index-url https://download.pytorch.org/whl/cpu
 
       - name: Synchronize Notebooks
         run: just sync
