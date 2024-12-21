@@ -34,14 +34,7 @@ jobs:
       - name: Install the project dependencies
         run: uv sync
 
-      - name: Install pytorch cpu
-        run: uv run pip install torch==2.2.2 --index-url https://download.pytorch.org/whl/cpu
-
-      - name: Synchronize Notebooks
-        run: just sync
-
-      - name: Check
-        run: just check
+      - uses: pre-commit/action@v3.0.1
 
       - name: Check for changes
         id: git-check
