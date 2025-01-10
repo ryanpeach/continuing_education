@@ -4,11 +4,13 @@ Some projects I'm using to learn AI since my MS
 
 # TODO
 
+`*` Indicates Priority
+
 * Reinforcement Learning
     * Value Based Methods - I'm pretty much up to date with these methods, but might as well implement them. I may go into less explanation though.
         * [ ] [$TD(\lambda)$](https://web.stanford.edu/class/cs234/notes/cs234-notes7.pdf)
         * [X] [Deep Q Learning](https://arxiv.org/abs/1312.5602) *
-          * [[https://lightning.ai/docs/pytorch/LTS/notebooks/lightning_examples/reinforce-learning-DQN.html]]
+          * <https://lightning.ai/docs/pytorch/LTS/notebooks/lightning_examples/reinforce-learning-DQN.html>
         * [ ] [Prioritized Experience Replay](https://arxiv.org/abs/1511.05952) *
         * [ ] [Double Q Learning](https://arxiv.org/abs/1509.06461) *
         * [ ] [Dueling Q Learning](https://arxiv.org/abs/1511.06581)
@@ -21,21 +23,21 @@ Some projects I'm using to learn AI since my MS
         * [ ] [Actor-Critic](https://arxiv.org/pdf/1602.01783v2) (A2C, A3C) *
         * [ ] [Trust Region Policy Optimization](https://arxiv.org/pdf/1502.05477) (TRPO)
         * [ ] [Proximal Policy Optimization](https://arxiv.org/abs/1707.06347) (PPO) *
-        * [ ] [[Deep Deterministic Policy Gradient]](https://arxiv.org/abs/1509.02971v6) (DDPG)
+        * [ ] [Deep Deterministic Policy Gradient](https://arxiv.org/abs/1509.02971v6) (DDPG)
     * Model Based Reinforcement Learning
         * [ ] [[AlphaZero]](https://arxiv.org/abs/1712.01815)
         * [ ] [MuZero](https://www.nature.com/articles/s41586-020-03051-4.epdf?sharing_token=kTk-xTZpQOF8Ym8nTQK6EdRgN0jAjWel9jnR3ZoTv0PMSWGj38iNIyNOw_ooNp2BvzZ4nIcedo7GEXD7UmLqb0M_V_fop31mMY9VBBLNmGbm0K9jETKkZnJ9SgJ8Rwhp3ySvLuTcUr888puIYbngQ0fiMf45ZGDAQ7fUI66-u7Y%3D)
-            * [[https://deepmind.google/discover/blog/muzero-mastering-go-chess-shogi-and-atari-without-rules/]]
+            * <https://deepmind.google/discover/blog/muzero-mastering-go-chess-shogi-and-atari-without-rules/>
         * [ ] [Dreamer](https://arxiv.org/pdf/1912.01603)
-            * [[https://research.google/blog/introducing-dreamer-scalable-reinforcement-learning-using-world-models/]]
+            * <https://research.google/blog/introducing-dreamer-scalable-reinforcement-learning-using-world-models/>
         * [ ] [Efficient Zero](https://arxiv.org/abs/2111.00210)
         * [ ] [Efficient Zero V2](https://arxiv.org/abs/2403.00564)
         * [ ] [SIMA](https://arxiv.org/abs/2404.10179)
-            * [[https://deepmind.google/discover/blog/sima-generalist-ai-agent-for-3d-virtual-environments/]]
+            * <https://deepmind.google/discover/blog/sima-generalist-ai-agent-for-3d-virtual-environments/>
         * [ ] [Genie 1](https://arxiv.org/abs/2402.15391)
-            * [[https://deepmind.google/research/publications/60474/]]
+            * <https://deepmind.google/research/publications/60474/>
         * [ ] [Genie 2](https://arxiv.org/pdf/2405.15489)
-            * [[https://deepmind.google/discover/blog/genie-2-a-large-scale-foundation-world-model/]]
+            * <https://deepmind.google/discover/blog/genie-2-a-large-scale-foundation-world-model/>
     * [ ] [Exploration in RL](https://github.com/opendilab/awesome-exploration-rl)
          * [ ] [Go-Explore](https://www.nature.com/articles/s41586-020-03157-9)
          * [ ] [NoisyNet](https://openreview.net/pdf?id=rywHCPkAW)
@@ -58,7 +60,7 @@ Some projects I'm using to learn AI since my MS
     * Multi Agent RL
         * [ ] [Emergent Communication through Negotiation](https://arxiv.org/abs/1804.03980)
         * [ ] Warp Drive
-           * [[https://lightning.ai/docs/pytorch/LTS/notebooks/lightning_examples/warp-drive.html]]
+           * <https://lightning.ai/docs/pytorch/LTS/notebooks/lightning_examples/warp-drive.html>
     * [Human-Timescale Adaptation in an Open-Ended Task Space](https://sites.google.com/view/adaptive-agent/)
         * [Muesli](https://arxiv.org/pdf/2104.06159)
         * [Transformer-XL](https://arxiv.org/abs/1901.02860)
@@ -70,8 +72,8 @@ Some projects I'm using to learn AI since my MS
     * [ ] [Tokenization](https://huggingface.co/learn/nlp-course/en/chapter6/1?fw=pt)
     * [ ] [Word Embeddings](https://pytorch.org/tutorials/beginner/nlp/word_embeddings_tutorial.html)
     * [ ] [Transformers](https://arxiv.org/abs/1706.03762) *
-      * https://pytorch.org/tutorials/beginner/transformer_tutorial.html
-      * https://lightning.ai/docs/pytorch/stable/notebooks/course_UvA-DL/05-transformers-and-MH-attention.html
+      * <https://pytorch.org/tutorials/beginner/transformer_tutorial.html>
+      * <https://lightning.ai/docs/pytorch/stable/notebooks/course_UvA-DL/05-transformers-and-MH-attention.html>
     * [ ] [BERT](https://arxiv.org/abs/1810.04805) *
     * [ ] [Sentence-BERT](https://arxiv.org/pdf/1908.10084) *
     * [ ] [Fine Tuning](https://huggingface.co/learn/nlp-course/en/chapter3/1?fw=pt)
@@ -82,7 +84,7 @@ Some projects I'm using to learn AI since my MS
     * [ ] [Sentence Transformers](https://medium.com/@vipra_singh/building-llm-applications-sentence-transformers-part-3-a9e2529f99c1)
     * [ ] [Multi token prediction](https://arxiv.org/pdf/2404.19737)
     * [ ] Time Series
-        * [[https://www.datadoghq.com/blog/datadog-time-series-foundation-model/]]
+        * <https://www.datadoghq.com/blog/datadog-time-series-foundation-model/>
 * RAG
     * [Survey on RAG](https://arxiv.org/abs/2405.06211)
         * [ ] REALM *
@@ -95,9 +97,9 @@ Some projects I'm using to learn AI since my MS
         * [ ] Self reinforce
     * [Survey on Graph RAG](https://arxiv.org/abs/2408.08921)
 * [ ] Diffusion Models
-  * [[https://lightning.ai/lightning-community-labs/studios/build-diffusion-models-with-pytorch-lightning-hf-diffusers]]
+  * <https://lightning.ai/lightning-community-labs/studios/build-diffusion-models-with-pytorch-lightning-hf-diffusers>
 * [ ] Graph Neural Networks (GNN) *
-  * [[https://lightning.ai/docs/pytorch/stable/notebooks/course_UvA-DL/06-graph-neural-networks.html]]
+  * <https://lightning.ai/docs/pytorch/stable/notebooks/course_UvA-DL/06-graph-neural-networks.html>
 * Cognitive Science
    * [ ] [Hopfield Network](https://www.youtube.com/watch?v=1WPJdAW-sFo)
    * [ ] [Boltzman Machine](https://www.youtube.com/watch?v=_bqa_I5hNAo)
