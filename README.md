@@ -25,7 +25,7 @@ Some projects I'm using to learn AI since my MS
         * [ ] [Proximal Policy Optimization](https://arxiv.org/abs/1707.06347) (PPO) *
         * [ ] [Deep Deterministic Policy Gradient](https://arxiv.org/abs/1509.02971v6) (DDPG)
     * Model Based Reinforcement Learning
-        * [ ] [[AlphaZero]](https://arxiv.org/abs/1712.01815)
+        * [ ] [AlphaZero](https://arxiv.org/abs/1712.01815)
         * [ ] [MuZero](https://www.nature.com/articles/s41586-020-03051-4.epdf?sharing_token=kTk-xTZpQOF8Ym8nTQK6EdRgN0jAjWel9jnR3ZoTv0PMSWGj38iNIyNOw_ooNp2BvzZ4nIcedo7GEXD7UmLqb0M_V_fop31mMY9VBBLNmGbm0K9jETKkZnJ9SgJ8Rwhp3ySvLuTcUr888puIYbngQ0fiMf45ZGDAQ7fUI66-u7Y%3D)
             * <https://deepmind.google/discover/blog/muzero-mastering-go-chess-shogi-and-atari-without-rules/>
         * [ ] [Dreamer](https://arxiv.org/pdf/1912.01603)
@@ -62,9 +62,9 @@ Some projects I'm using to learn AI since my MS
         * [ ] Warp Drive
            * <https://lightning.ai/docs/pytorch/LTS/notebooks/lightning_examples/warp-drive.html>
     * [Human-Timescale Adaptation in an Open-Ended Task Space](https://sites.google.com/view/adaptive-agent/)
-        * [Muesli](https://arxiv.org/pdf/2104.06159)
-        * [Transformer-XL](https://arxiv.org/abs/1901.02860)
-        * [Robust PLR](https://arxiv.org/pdf/2110.02439)
+        * [ ] [Muesli](https://arxiv.org/pdf/2104.06159)
+        * [ ] [Transformer-XL](https://arxiv.org/abs/1901.02860)
+        * [ ] [Robust PLR](https://arxiv.org/pdf/2110.02439)
     * Distributed RL
         * [ ] [Survey](https://arxiv.org/pdf/2011.11012)
         * [ ] [RLLib](https://docs.ray.io/en/master/rllib.html)
