@@ -8,7 +8,7 @@ Some projects I'm using to learn AI since my MS
 
 * Reinforcement Learning
     * Value Based Methods - I'm pretty much up to date with these methods, but might as well implement them. I may go into less explanation though.
-        * [ ] [$TD(\lambda)$](https://web.stanford.edu/class/cs234/notes/cs234-notes7.pdf)
+        * [ ] [ ] [$TD(\lambda)$](https://web.stanford.edu/class/cs234/notes/cs234-notes7.pdf)
         * [X] [Deep Q Learning](https://arxiv.org/abs/1312.5602) *
           * <https://lightning.ai/docs/pytorch/LTS/notebooks/lightning_examples/reinforce-learning-DQN.html>
         * [ ] [Prioritized Experience Replay](https://arxiv.org/abs/1511.05952) *
