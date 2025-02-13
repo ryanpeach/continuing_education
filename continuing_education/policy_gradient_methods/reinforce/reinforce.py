@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.16.7
 #   kernelspec:
 #     display_name: continuing-education-vJKa4-To-py3.10
 #     language: python
@@ -52,9 +52,9 @@ from typing import cast
 def get_environment_space(env_name: str) -> tuple[tuple[int, ...], int]:
     env = gym.make(env_name)
     observation_space_shape = env.observation_space.shape
-    assert (
-        observation_space_shape is not None
-    ), "Observation space shape should not be None"
+    assert observation_space_shape is not None, (
+        "Observation space shape should not be None"
+    )
     action_space_size = env.action_space.n  # type: ignore[attr-defined]
     print("State size:", observation_space_shape)
     print("Action size:", action_space_size)
@@ -164,12 +164,12 @@ class Policy(nn.Module):
         pdf = softmax_with_temperature(
             self.forward(state_tensor), temperature=temperature
         )
-        assert torch.isclose(
-            pdf.sum().cpu(), torch.Tensor([1.0])
-        ).all(), "The output of the network should be a probability distribution"
-        assert (
-            pdf.cpu().shape[-1] == self.action_size
-        ), "The output of the network should be a probability distribution over the action space"
+        assert torch.isclose(pdf.sum().cpu(), torch.Tensor([1.0])).all(), (
+            "The output of the network should be a probability distribution"
+        )
+        assert pdf.cpu().shape[-1] == self.action_size, (
+            "The output of the network should be a probability distribution over the action space"
+        )
 
         # Now we want to get the action that corresponds to the highest probability
         # TODO: We could sample from the pdf instead of taking the greedy argmax
@@ -514,9 +514,9 @@ def test_reinforce_train() -> None:
         num_episodes=100,
         max_t=10,
     )
-    assert all(
-        [score == 10 for score in scores[90:]]
-    ), "The last 10 scores should be 10"
+    assert all([score == 10 for score in scores[90:]]), (
+        "The last 10 scores should be 10"
+    )
 
 
 if __name__ == "__main__":
@@ -603,12 +603,12 @@ class SamplePolicy(Policy):
         pdf = softmax_with_temperature(
             self.forward(state_tensor), temperature=temperature
         )
-        assert torch.isclose(
-            pdf.sum().cpu(), torch.Tensor([1.0])
-        ).all(), "The output of the network should be a probability distribution"
-        assert (
-            pdf.cpu().shape[-1] == self.action_size
-        ), "The output of the network should be a probability distribution over the action space"
+        assert torch.isclose(pdf.sum().cpu(), torch.Tensor([1.0])).all(), (
+            "The output of the network should be a probability distribution"
+        )
+        assert pdf.cpu().shape[-1] == self.action_size, (
+            "The output of the network should be a probability distribution over the action space"
+        )
 
         # Now we want to get the action that corresponds to the highest probability
         # TODO: We could sample from the pdf instead of taking the greedy argmax
@@ -622,7 +622,7 @@ class SamplePolicy(Policy):
         log_prob = m.log_prob(action_idx)
 
         # We return the action and the log probability of the action
-        return Action(action_idx.item()), log_prob
+        return Action(int(action_idx.item())), log_prob
 
 
 # %%
@@ -676,9 +676,9 @@ def test_reinforce_train_batch() -> None:
         max_t=10,
         temperature=1.0,
     )
-    assert all(
-        [score >= 9 for score in scores[90:]]
-    ), f"The last 10 scores should be 10, maybe some 9s. Got: {scores}"
+    assert all([score >= 9 for score in scores[90:]]), (
+        f"The last 10 scores should be 10, maybe some 9s. Got: {scores}"
+    )
 
 
 if __name__ == "__main__":

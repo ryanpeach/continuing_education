@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.16.7
 #   kernelspec:
 #     display_name: continuing-education-vJKa4-To-py3.10
 #     language: python
@@ -71,14 +71,14 @@ def logarithm_properties() -> None:
     a, b = symbols("a b", positive=True, real=True)
 
     # Logarithmic properties
-    log_mult = Eq(log(a * b), log(a) + log(b))
-    log_div = Eq(log(a / b), log(a) - log(b))
+    log_mult = Eq(log(a * b), log(a) + log(b))  # pyright: ignore[reportOperatorIssue]
+    log_div = Eq(log(a / b), log(a) - log(b))  # pyright: ignore[reportOperatorIssue]
     log_exp = Eq(log(a**b), b * log(a))
 
     # Check and simplify each equation to verify correctness
-    simplify_log_mult = simplify(log_mult.lhs - log_mult.rhs)
-    simplify_log_div = simplify(log_div.lhs - log_div.rhs)
-    simplify_log_exp = simplify(log_exp.lhs - log_exp.rhs)
+    simplify_log_mult = simplify(log_mult.lhs - log_mult.rhs)  # pyright: ignore[reportOperatorIssue]
+    simplify_log_div = simplify(log_div.lhs - log_div.rhs)  # pyright: ignore[reportOperatorIssue]
+    simplify_log_exp = simplify(log_exp.lhs - log_exp.rhs)  # pyright: ignore[reportOperatorIssue]
 
     assert simplify_log_mult == 0
     assert simplify_log_div == 0
@@ -148,7 +148,7 @@ def plot_logarithm_continuous() -> None:
         x=x_values,
         y=log_values,
         labels={"x": "x", "y": "log(x/(1+e^(-x)))"},
-        title=f"Logarithm of x from {1/(1+np.exp(-max_x))*100:.2f}% to {1/(1+np.exp(max_x))*100:.2f}% where x is first passed through a sigmoid function to make it continuous",
+        title=f"Logarithm of x from {1 / (1 + np.exp(-max_x)) * 100:.2f}% to {1 / (1 + np.exp(max_x)) * 100:.2f}% where x is first passed through a sigmoid function to make it continuous",
     )
     fig.show()
 

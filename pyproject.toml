@@ -7,32 +7,32 @@ authors = [
     {name = "Ryan Peach", email = "rgpeach10@gmail.com"},
 ]
 license = {text = "MIT"}
-requires-python = "<4.0,>=3.10"
+requires-python = "~=3.11"
 dependencies = [
-    "gymnasium<1.0.0,>=0.29.1",
-    "numpy<2.0.0,>=1.26.4",
-    "pydantic<3.0.0,>=2.6.4",
-    "pillow<11.0.0,>=10.2.0",
-    "pygame<3.0.0,>=2.5.2",
-    "gym-games<2.0.0,>=1.0.3",
-    "MinAtar<2.0.0,>=1.0.15",
-    "huggingface-hub<1.0.0,>=0.21.4",
-    "ipytest<1.0.0,>=0.14.0",
-    "ple @ file:///${PROJECT_ROOT}/submodules/PyGame-Learning-Environment",
-    "plotly<6.0.0,>=5.20.0",
-    "sympy<2.0,>=1.12",
-    "tqdm<5.0.0,>=4.66.2",
-    "pandas<3.0.0,>=2.2.2",
-    "gitpython<4.0.0,>=3.1.43",
+    "gymnasium~=0.29.1",
+    "numpy~=1.26.4",
+    "pydantic~=2.6.4",
+    "pillow~=10.2.0",
+    "pygame~=2.5.2",
+    "gym-games~=1.0.3",
+    "MinAtar~=1.0.15",
+    "huggingface-hub~=0.21.4",
+    "ipytest~=0.14.0",
+    "plotly~=5.20.0",
+    "sympy~=1.12",
+    "tqdm~=4.66.2",
+    "pandas~=2.2.2",
+    "gitpython~=3.1.43",
     "torch>=2.4.1",
+    "ple",
 ]
 [dependency-groups]
 dev = [
-    "pytest<9.0.0,>=8.1.1",
-    "jupyter<2.0.0,>=1.0.0",
-    "jupytext<2.0.0,>=1.16.1",
-    "pre-commit<4.0.0,>=3.6.2",
-    "types-tqdm<5.0.0.0,>=4.66.0.20240106",
+    "pytest~=8.1.1",
+    "jupyter~=1.0.0",
+    "jupytext~=1.16.1",
+    "pre-commit~=3.6.2",
+    "types-tqdm~=4.66.0.20240106",
 ]
 
 [tool.pdm.build]
@@ -52,3 +52,13 @@ extend-ignore = ["E402"]
 [tool.pyright]
 venvPath = "."
 venv = ".venv"
+reportPrivateImportUsage = false
+reportPossiblyUnboundVariable = false # This happens a lot with juyter notebooks
+
+[tool.uv]
+dev-dependencies = [
+    "jupytext>=1.16.7",
+]
+
+[tool.uv.sources]
+ple = { git = "https://github.com/ntasfi/PyGame-Learning-Environment.git" }

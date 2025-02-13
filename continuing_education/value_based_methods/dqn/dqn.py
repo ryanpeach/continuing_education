@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.16.7
 #   kernelspec:
 #     display_name: continuing_education
 #     language: python
@@ -105,9 +105,9 @@ class QLearningModel(nn.Module):
         # Now we can run the forward pass, whos output is a probability distribution
         # along the action space
         action_values = self.forward(state_tensor)
-        assert (
-            action_values.cpu().shape[-1] == self.action_size
-        ), "The output of the network should be a probability distribution over the action space"
+        assert action_values.cpu().shape[-1] == self.action_size, (
+            "The output of the network should be a probability distribution over the action space"
+        )
 
         # Now we want to get the action that corresponds to the highest probability
         # TODO: We could sample from the pdf instead of taking the greedy argmax
@@ -115,9 +115,9 @@ class QLearningModel(nn.Module):
 
         # We return the action and the log probability of the action
         action_idx_cpu = int(action_idx.item())
-        assert (
-            0 <= action_idx_cpu < self.action_size
-        ), "The action index should be within the action space"
+        assert 0 <= action_idx_cpu < self.action_size, (
+            "The action index should be within the action space"
+        )
         if random.random() < exploration_rate:
             return Action(random.randint(0, self.action_size - 1))
 
@@ -318,9 +318,9 @@ def test_reinforce_train() -> None:
         batch_size=50,
         exploration_rate_decay=0.96,
     )
-    assert all(
-        [score == 10 for score in scores[90:]]
-    ), f"The last 10 scores should be 10, got: {scores[90:]}"
+    assert all([score == 10 for score in scores[90:]]), (
+        f"The last 10 scores should be 10, got: {scores[90:]}"
+    )
 
 
 if __name__ == "__main__":
