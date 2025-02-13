@@ -2,6 +2,22 @@
 
 Some projects I'm using to learn AI since my MS
 
+# Installation
+
+First follow specific instructions for your operating system listed in subheaders below.
+
+Consider modifying pyproject.toml to handle your necessary cuda version as an optional dependency.
+
+Run `uv sync` to install all dependencies.
+
+## MacOSX
+
+`brew install sdl sdl_ttf sdl_image sdl_mixer portmidi`
+
+## Ubuntu
+
+`sudo apt-get install libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libfreetype6-dev libportmidi-dev libjpeg-dev python3-setuptools python3-dev python3-numpy`
+
 # TODO
 
 * Emoji Meanings
@@ -122,25 +138,3 @@ Some projects I'm using to learn AI since my MS
 * [Lightning Tutorials](https://lightning.ai/docs/pytorch/stable/notebooks.html)
 * [Hugging Face RL](https://huggingface.co/learn/deep-rl-course/unit0/introduction)
 * [Pytorch](https://pytorch.org/tutorials)
-
-# Installation
-
-First follow specific instructions for your operating system listed in subheaders below.
-
-Then make sure you have cloned the submodules:
-
-`git submodule update --init --recursive`
-
-Then install the dependencies:
-
-`uv sync`
-
-You may want to read [this](https://docs.astral.sh/uv/guides/integration/pytorch/) about installing pytorch specifically for your system.
-
-## MacOSX
-
-`brew install sdl sdl_ttf sdl_image sdl_mixer portmidi`
-
-## Ubuntu
-
-`sudo apt-get install libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libfreetype6-dev libportmidi-dev libjpeg-dev python3-setuptools python3-dev python3-numpy`
