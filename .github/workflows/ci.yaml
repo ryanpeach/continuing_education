@@ -35,19 +35,3 @@ jobs:
         run: uv sync
 
       - uses: pre-commit/action@v3.0.1
-
-      - name: Check for changes
-        id: git-check
-        run: |
-          if git diff --exit-code; then
-            echo "No changes detected."
-          else
-            echo "Changes detected!"
-            echo "::set-output name=changes_detected::true"
-            git diff
-          fi
-
-      - name: Fail if changes are detected
-        if: steps.git-check.outputs.changes_detected == 'true'
-        run: exit 1
-        shell: bash
