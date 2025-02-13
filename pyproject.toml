@@ -49,3 +49,6 @@ exclude = ["./submodules"]
 [tool.ruff.lint]
 extend-ignore = ["E402"]
 
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
