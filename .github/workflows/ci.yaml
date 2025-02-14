@@ -32,6 +32,6 @@ jobs:
           key: venv-${{ hashFiles('uv.lock') }}
 
       - name: Install the project dependencies
-        run: uv sync
+        run: uv sync --frozen
 
       - uses: pre-commit/action@v3.0.1

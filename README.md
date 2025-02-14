@@ -10,6 +10,10 @@ Consider modifying pyproject.toml to handle your necessary cuda version as an op
 
 Run `uv sync` to install all dependencies.
 
+# Styleguide
+
+See [.github/pull_request_template.md](.github/pull_request_template.md) for the styleguide.
+
 ## MacOSX
 
 `brew install sdl sdl_ttf sdl_image sdl_mixer portmidi`
