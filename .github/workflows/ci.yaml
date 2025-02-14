@@ -20,44 +20,18 @@ jobs:
       - name: Install Just
         uses: extractions/setup-just@v2
 
-      - name: Install poetry
-        uses: abatilo/actions-poetry@v2
-
-      - name: Setup a local virtual environment (if no poetry.toml file)
-        run: |
-          poetry config virtualenvs.create true --local
-          poetry config virtualenvs.in-project true --local
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
 
       - uses: actions/cache@v3
         name: Define a cache for the virtual environment based on the dependencies lock file
         with:
           path: ./.venv
-          key: venv-${{ hashFiles('poetry.lock') }}
+          key: venv-${{ hashFiles('uv.lock') }}
 
       - name: Install the project dependencies
-        run: poetry install
+        run: uv sync
 
-      - name: Install pytorch cpu
-        run: poetry run pip install torch==2.2.2 --index-url https://download.pytorch.org/whl/cpu
-
-      - name: Synchronize Notebooks
-        run: just sync
-
-      - name: Check
-        run: just check
-
-      - name: Check for changes
-        id: git-check
-        run: |
-          if git diff --exit-code; then
-            echo "No changes detected."
-          else
-            echo "Changes detected!"
-            echo "::set-output name=changes_detected::true"
-            git diff
-          fi
-
-      - name: Fail if changes are detected
-        if: steps.git-check.outputs.changes_detected == 'true'
-        run: exit 1
-        shell: bash
+      - uses: pre-commit/action@v3.0.1
