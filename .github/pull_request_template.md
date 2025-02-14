@@ -2,7 +2,14 @@ Great job making a new implementation!
 
 Here are some tasks to complete before merging this PR:
 
-## Task List for all Jupyter Notebooks
+# Styleguide
+
+## Jupyter
+
+- [ ] Make sure it runs on cpu and gpu
+- [ ] Comment the shapes of any numpy arrays or torch tensors. Make assertions on the output.
+- [ ] Functions that have more than one parameter should have a `*` before the first or second parameter to force the user to use named arguments, unless there is only one parameter.
+- [ ] Do not set default values, you might forget to pass parameters up the stack.
 - [ ] Add the proper headers to the notebook:
 
 ```
@@ -20,22 +27,9 @@ if __name__ == '__main__':
     foo()
 ```
 
-- [ ] APA style citations for all sources at the bottom.
+## Logseq
 
-- [ ] Actually read the paper you cite, not just the tutorial
-
-- [ ] Make logseq notes and flash cards. 
-
-- [ ] In natural language, explain your understanding of the solution.
-
-- [ ] In mathematical language, document all implementations of all equations in the same notation as the source paper. Preferably you would do this in the functions docstrings, and cite the equation number in the paper. If it's a single line expression you can instead add a comment in the code.
-
-- [ ] Comment the shapes of any numpy arrays or torch tensors. Make assertions on the output.
-
-- [ ] Ask ChatGPT to review your work.
-
-- [ ] Functions that have more than one parameter should have a `*` before the first or second parameter to force the user to use named arguments, unless there is only one parameter.
-
-- [ ] Do not set default values, you might forget to pass parameters up the stack.
-
-- [ ] Make sure it runs on cpu and gpu
+- [ ] Make logseq notes and flash cards.
+- [ ] Do not use logseq aliases so that the graph looks clean and its more navigable.
+- [ ] Use singular nouns for tags.
+- [ ] Use spaces in filenames instead of `-` or `_` just so that you don't have to use aliases (ugly I know).
