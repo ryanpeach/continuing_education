@@ -41,11 +41,11 @@
     - Since the rewards are arbitrary and directly part of the objective/loss function, they are normalized to make the optimization more stable.
 - What is a multinomial [[distribution]]? #card
     - A [[probability]] [[distribution]] over a discrete number of possible outcomes, where each outcome has a [[probability]] associated with it. Like a dice roll, where each face has a [[probability]] of being rolled.
-- What are some advantages of [[policy gradient]] methods over value-based methods? #card
+- What are some advantages of [[policy gradient]] methods over [[value based methods]]? #card
     - They can learn stochastic policies
     - They can learn policies in high-dimensional or continuous action spaces
     - They can have better convergence properties, they can be made to change smoothly over time with sampling rather than depending on an argmax operation.
-- What are some disadvantages of [[policy gradient]] methods vs [[value-based methods]]? #card
+- What are some disadvantages of [[policy gradient]] methods vs [[value based methods]] ? #card
     - They have high variance in the [[gradients]] which can lead to # [[card]]
         - Slow convergence
         - Catastrophic forgetting

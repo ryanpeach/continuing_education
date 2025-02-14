@@ -1,3 +1,0 @@
----
-alias: value-based methods
----
