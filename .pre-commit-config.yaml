@@ -36,3 +36,11 @@ repos:
   hooks:
   - id: jupytext
     args: [--sync]
+- repo: https://github.com/ryanpeach/mdlinker
+  rev: v1.6.1
+  hooks:
+    - id: enforce-ascii
+      files: notes/pages/.*\.md
+    - id: mdlinker
+      args:
+      - "--fix"
