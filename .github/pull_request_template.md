@@ -24,7 +24,7 @@ if __name__ == '__main__':
 
 - [ ] Actually read the paper you cite, not just the tutorial
 
-- [ ] Make logseq compatible flash cards. Save them to a readme in the same folder as the notebook.
+- [ ] Make logseq notes and flash cards. 
 
 - [ ] In natural language, explain your understanding of the solution.
 
