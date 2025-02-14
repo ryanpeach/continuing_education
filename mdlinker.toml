@@ -1,0 +1,3 @@
+pages_directory = "notes/pages"
+
+other_directories = ["notes/journal"]
