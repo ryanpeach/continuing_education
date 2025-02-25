@@ -217,7 +217,13 @@ if __name__ == "__main__":
     EXPLORE_RATE_DECAY = 0.99
     # Do this a few times to prove consistency
     last_10_percent_mean = []
-
+    EM = ExperimentManager(
+        name="DDQN",
+        description="Main Results",
+        primary_metric="last_10_percent_mean",
+        file=__this_file,
+    )
+    
     for _ in range(3):
         for adv_type in [AdvantageType.AVG, AdvantageType.MAX]:
             env = gym.make("CartPole-v1")
@@ -274,12 +280,7 @@ if __name__ == "__main__":
             fig.update_yaxes(title_text="Exploration Rate", secondary_y=True)
             fig.update_yaxes(title_text="Score", secondary_y=False)
             fig.show()
-    ExperimentManager(
-        name="DDQN",
-        description="Main Results",
-        primary_metric="last_10_percent_mean",
-        file=__this_file,
-    ).commit(metrics={"last_10_percent_mean": last_10_percent_mean})
+    EM.commit(metrics={"last_10_percent_mean": last_10_percent_mean})
 
 # %% [markdown]
 # # References
