@@ -34,25 +34,25 @@ if __name__ == "__main__":
 # %%
 from torch import nn
 
-from continuing_education.policy_gradient_methods.reinforce import Action, State, Env
-import random
-
 
 # %%
 from continuing_education.value_based_methods.dqn.dqn import QLearningModel
 from enum import Enum
 
+
 class AdvantageType(str, Enum):
     AVG = "avg"
     MAX = "max"
-    
+
+
 class DuelingQLearningModel(QLearningModel):
     def __init__(
-        self, *, 
-        state_size: int, 
-        action_size: int, 
-        hidden_sizes: list[int], 
-        advantage_hidden_sizes: list[int], 
+        self,
+        *,
+        state_size: int,
+        action_size: int,
+        hidden_sizes: list[int],
+        advantage_hidden_sizes: list[int],
         value_hidden_sizes: list[int],
         adv_type: AdvantageType,
     ) -> None:
@@ -62,9 +62,13 @@ class DuelingQLearningModel(QLearningModel):
         we will not softmax the output, because its not a probability distribution, but rather
         a regressor that outputs the Q value of each action.
         """
-        super().__init__(state_size=state_size, action_size=action_size, hidden_sizes=hidden_sizes)
+        super().__init__(
+            state_size=state_size, action_size=action_size, hidden_sizes=hidden_sizes
+        )
         assert len(hidden_sizes) > 0, "Need at least one hidden layer"
-        assert len(advantage_hidden_sizes) > 0, "Need at least one advantage hidden layer"
+        assert len(advantage_hidden_sizes) > 0, (
+            "Need at least one advantage hidden layer"
+        )
         assert len(value_hidden_sizes) > 0, "Need at least one value hidden layer"
         self.state_size = state_size
         self.action_size = action_size
@@ -89,24 +93,35 @@ class DuelingQLearningModel(QLearningModel):
         # Now we are going to split into the value and advantage branches
         # Advantage Network
         advantage_network: list[nn.Module] = []
-        advantage_network.append(nn.Linear(hidden_sizes[-1], advantage_hidden_sizes[0])) # Shape: (:, hidden_sizes[-1], advantage_hidden_sizes[0])
+        advantage_network.append(
+            nn.Linear(hidden_sizes[-1], advantage_hidden_sizes[0])
+        )  # Shape: (:, hidden_sizes[-1], advantage_hidden_sizes[0])
         advantage_network.append(nn.ReLU())
         for i in range(len(advantage_hidden_sizes) - 1):
-            advantage_network.append(nn.Linear(advantage_hidden_sizes[i], advantage_hidden_sizes[i + 1])) # Shape: (:, advantage_hidden_sizes[i], advantage_hidden_sizes[i + 1])
+            advantage_network.append(
+                nn.Linear(advantage_hidden_sizes[i], advantage_hidden_sizes[i + 1])
+            )  # Shape: (:, advantage_hidden_sizes[i], advantage_hidden_sizes[i + 1])
             advantage_network.append(nn.ReLU())
-        advantage_network.append(nn.Linear(advantage_hidden_sizes[-1], action_size))  # Shape: (:, advantage_hidden_sizes[-1], action_size)
+        advantage_network.append(
+            nn.Linear(advantage_hidden_sizes[-1], action_size)
+        )  # Shape: (:, advantage_hidden_sizes[-1], action_size)
         self.advantage_network = nn.Sequential(*advantage_network).to(DEVICE)
-        
+
         # Value Network
         value_network: list[nn.Module] = []
-        value_network.append(nn.Linear(hidden_sizes[-1], value_hidden_sizes[0])) # Shape: (:, hidden_sizes[-1], value_hidden_sizes[0])
+        value_network.append(
+            nn.Linear(hidden_sizes[-1], value_hidden_sizes[0])
+        )  # Shape: (:, hidden_sizes[-1], value_hidden_sizes[0])
         value_network.append(nn.ReLU())
         for i in range(len(advantage_hidden_sizes) - 1):
-            value_network.append(nn.Linear(value_hidden_sizes[i], value_hidden_sizes[i + 1])) # Shape: (:, value_hidden_sizes[i], value_hidden_sizes[i + 1])
+            value_network.append(
+                nn.Linear(value_hidden_sizes[i], value_hidden_sizes[i + 1])
+            )  # Shape: (:, value_hidden_sizes[i], value_hidden_sizes[i + 1])
             value_network.append(nn.ReLU())
-        value_network.append(nn.Linear(value_hidden_sizes[-1], 1))  # Shape: (:, value_hidden_sizes[-1], 1)
+        value_network.append(
+            nn.Linear(value_hidden_sizes[-1], 1)
+        )  # Shape: (:, value_hidden_sizes[-1], 1)
         self.value_network = nn.Sequential(*value_network).to(DEVICE)
-        
 
     def forward(self, state: torch.Tensor) -> torch.Tensor:
         """Takes a state tensor and returns logits along the action space"""
@@ -117,19 +132,24 @@ class DuelingQLearningModel(QLearningModel):
 
         # These "recreate" the Q function via a value function and an advantage function
         if self.adv_type == AdvantageType.AVG:
-          advAverage = torch.mean(advantage_out, dim=1, keepdim=True)
-          q =  value_out + advantage_out - advAverage
+            advAverage = torch.mean(advantage_out, dim=1, keepdim=True)
+            q = value_out + advantage_out - advAverage
         elif self.adv_type == AdvantageType.MAX:
-          advMax,_ = torch.max(advantage_out, dim=1, keepdim=True)
-          q =  value_out + advantage_out - advMax
+            advMax, _ = torch.max(advantage_out, dim=1, keepdim=True)
+            q = value_out + advantage_out - advMax
         else:
             raise KeyError(f"{self.adv_type} not recognized")
         return q
 
+
 # %%
 from continuing_education.policy_gradient_methods.reinforce.reinforce import MockEnv
-from continuing_education.value_based_methods.dqn.dqn import dqn_train, objective, ActionReplayMemory
+from continuing_education.value_based_methods.dqn.dqn import (
+    dqn_train,
+    ActionReplayMemory,
+)
 from torch import optim
+
 
 def test_ddqn_train() -> None:
     """Test the reinforce training loop on the mock environment."""
@@ -140,7 +160,7 @@ def test_ddqn_train() -> None:
         hidden_sizes=[16, 16],
         advantage_hidden_sizes=[16],
         value_hidden_sizes=[16],
-        adv_type=AdvantageType.MAX
+        adv_type=AdvantageType.MAX,
     )
     optimizer = optim.Adam(value_network.parameters(), lr=1e-3)
     memory = ActionReplayMemory(max_size=1000)
@@ -207,7 +227,7 @@ if __name__ == "__main__":
                 hidden_sizes=HIDDEN_SIZES,
                 advantage_hidden_sizes=ADVANTAGE_HIDDEN_SIZES,
                 value_hidden_sizes=VALUE_HIDDEN_SIZES,
-                adv_type=adv_type
+                adv_type=adv_type,
             ).to(DEVICE)
             optimizer = optim.Adam(value_network.parameters(), lr=LR)
             scores = dqn_train(
@@ -242,7 +262,10 @@ if __name__ == "__main__":
             )
             fig.add_trace(
                 go.Scatter(
-                    x=[i for i in range(NUM_EPISODES)], y=scores, name="Score", mode="lines"
+                    x=[i for i in range(NUM_EPISODES)],
+                    y=scores,
+                    name="Score",
+                    mode="lines",
                 ),
                 secondary_y=False,
             )
