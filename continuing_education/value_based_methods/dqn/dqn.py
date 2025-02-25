@@ -8,7 +8,7 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.16.7
 #   kernelspec:
-#     display_name: continuing_education
+#     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
 # ---
@@ -269,7 +269,6 @@ def dqn_train(
     batch_size: int,
     exploration_rate_decay: float,
 ) -> list[Reward]:
-    """Algorithm 1 REINFORCE"""
     assert gamma <= 1, "Gamma should be less than or equal to 1"
     assert gamma > 0, "Gamma should be greater than 0"
     assert num_episodes > 0, "Number of episodes should be greater than 0"
@@ -301,7 +300,7 @@ def dqn_train(
 from continuing_education.policy_gradient_methods.reinforce.reinforce import MockEnv
 
 
-def test_reinforce_train() -> None:
+def test_dqn_train() -> None:
     """Test the reinforce training loop on the mock environment."""
     env = MockEnv(max_steps=10)
     value_network = QLearningModel(state_size=1, action_size=2, hidden_sizes=[16, 16])
@@ -325,8 +324,8 @@ def test_reinforce_train() -> None:
 
 if __name__ == "__main__":
     for _ in range(3):
-        test_reinforce_train()
-        print("test_reinforce_train passed")
+        test_dqn_train()
+        print("test_dqn_train passed")
 
 # %%
 from continuing_education.policy_gradient_methods.reinforce.reinforce import (

@@ -57,7 +57,9 @@ reportPossiblyUnboundVariable = false # This happens a lot with juyter notebooks
 
 [tool.uv]
 dev-dependencies = [
+    "ipywidgets>=8.1.5",
     "jupytext>=1.16.7",
+    "notebook>=7.3.2",
 ]
 
 [tool.uv.sources]
