@@ -42,5 +42,7 @@ repos:
     - id: enforce-ascii
       files: notes/pages/.*\.md
     - id: mdlinker
+      files: notes/pages/.*\.md
       args:
       - "--fix"
+      - "--allow-dirty"

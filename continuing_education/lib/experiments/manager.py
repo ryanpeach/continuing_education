@@ -20,6 +20,16 @@ class ExperimentManager:
         self.file = file
         self.primary_metric = primary_metric
 
+        # Check for unstaged changes
+        # This is being moved to __init__ because we usually generate some notebook changes when running experiments, like plots and the like
+        self.repo = Repo(
+            path=self.file.absolute().parent, search_parent_directories=True
+        )
+        if self.repo.is_dirty(untracked_files=True):
+            warnings.warn(
+                "There are unstaged changes in the repository. Please commit or stage them before running the experiment manager."
+            )
+
     @property
     def is_jupytext(self) -> bool:
         return (
@@ -34,22 +44,17 @@ class ExperimentManager:
             subprocess.run(cmd, check=True)
 
     def commit(self, metrics: dict[str, Any] | None = None):
-        repo = Repo(path=self.file.absolute().parent, search_parent_directories=True)
         if metrics is None:
             metrics = {}
         self.run_jupytext_sync()
 
         # Staging files
-        files = [self.file.relative_to(repo.working_dir)]
+        files = [self.file.relative_to(self.repo.working_dir)]
         if self.is_jupytext:
-            files.append(self.file.relative_to(repo.working_dir).with_suffix(".py"))
-        repo.index.add(files)
-
-        # Check for unstaged changes
-        if repo.is_dirty(untracked_files=True):
-            warnings.warn(
-                "There are unstaged changes in the repository. Please commit or stage them before running the experiment manager."
+            files.append(
+                self.file.relative_to(self.repo.working_dir).with_suffix(".py")
             )
+        self.repo.index.add(files)
 
         # Committing changes
         if self.primary_metric in metrics:
@@ -57,6 +62,6 @@ class ExperimentManager:
         else:
             commit_message = f"Experiment: {self.name}"
         detailed_message = f"{self.description}\n\nResults:\n{pformat(metrics)}".strip()
-        repo.index.commit(
+        self.repo.index.commit(
             message=commit_message + "\n\n" + detailed_message, skip_hooks=True
         )

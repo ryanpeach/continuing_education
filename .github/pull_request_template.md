@@ -6,6 +6,7 @@ Here are some tasks to complete before merging this PR:
 
 ## Jupyter
 
+- [ ] Add references to the bottom of the notebook.
 - [ ] Make sure it runs on cpu and gpu
 - [ ] Comment the shapes of any numpy arrays or torch tensors. Make assertions on the output.
 - [ ] Functions that have more than one parameter should have a `*` before the first or second parameter to force the user to use named arguments, unless there is only one parameter.
@@ -30,6 +31,6 @@ if __name__ == '__main__':
 ## Logseq
 
 - [ ] Make logseq notes and flash cards.
-- [ ] Do not use logseq aliases so that the graph looks clean and its more navigable.
 - [ ] Use singular nouns for tags.
-- [ ] Use spaces in filenames instead of `-` or `_` just so that you don't have to use aliases (ugly I know).
+- [ ] Use `-` or `_` in filenames instead of spaces.
+- [ ] Use aliases for spaces and plurals.
