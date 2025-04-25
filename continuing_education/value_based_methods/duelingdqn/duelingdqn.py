@@ -141,7 +141,7 @@ class DuelingQLearningModel(QLearningModel):
             q = value_out + advantage_out - advMax
         else:
             raise KeyError(f"{self.adv_type} not recognized")
-        return q
+        return q # Shape: (:, advantage_hidden_sizes[-1], action_size)
 
 
 # %%
