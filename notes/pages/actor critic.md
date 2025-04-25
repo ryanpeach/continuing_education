@@ -1,8 +1,0 @@
-- What is the value function used for in [[actor critic]] methods? #card
-    - The value function is used to estimate the *average* expected return from a given state.
-    - It could theoretically be a Q-function, but in practice, it is often a state-value function using [[TD]] error.
-- What is the [[advantage]] function used for in [[actor critic]] methods? #card
-    - The difference between the expected reward from a state-action pair (Q) and the average expected reward from just the state (V).
-    - It is used to normalize the [[policy gradient]], as well as to push the [[policy gradient]] towards actions that are better than average and away from actions that are worse than average.
-- What is the training loop for [[a2c]] [[actor critic]]? #card
-- What is the difference between [[a2c]] and [[a3c]]? #card
