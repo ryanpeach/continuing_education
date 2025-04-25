@@ -1,3 +1,3 @@
 ---
-alias: value-based methods, value based methods, value methods
+alias: value-based methods, value based methods, value methods, value function
 ---

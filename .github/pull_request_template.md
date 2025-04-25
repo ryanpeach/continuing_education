@@ -6,6 +6,7 @@ Here are some tasks to complete before merging this PR:
 
 ## Jupyter
 
+- [ ] Add references to the bottom of the notebook.
 - [ ] Make sure it runs on cpu and gpu
 - [ ] Comment the shapes of any numpy arrays or torch tensors. Make assertions on the output.
 - [ ] Functions that have more than one parameter should have a `*` before the first or second parameter to force the user to use named arguments, unless there is only one parameter.

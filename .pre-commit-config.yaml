@@ -45,3 +45,4 @@ repos:
       files: notes/pages/.*\.md
       args:
       - "--fix"
+      - "--allow-dirty"

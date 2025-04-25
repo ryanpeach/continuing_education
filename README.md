@@ -10,6 +10,24 @@ Consider modifying pyproject.toml to handle your necessary cuda version as an op
 
 Run `uv sync` to install all dependencies.
 
+# Technologies
+
+## jupytext
+
+Jupyter is great to work in, but it has several shortcomings:
+
+1. A lack of a proper git diff when making a PR
+2. You can't import jupyter notebooks from other jupyter notebooks
+3. They can't be linted or formatted by tools like ruff or pyright
+
+So I am using [jupytext](https://github.com/mwouts/jupytext) to make syncronized copies of the jupyter notebooks in plain text `.py` format.
+
+If you then wrap cells (the code you run) in `if __name__ == "__main__"` you also now gain the ability to use these notebooks as importable libraries in future work.
+
+## Logseq
+
+I use [logseq](https://logseq.com/) to manage my [./notes](./notes) and [flashcards](https://hub.logseq.com/use-cases/1Sr4awszMQzD4GM5KvWim7/how-to-quickly-create-spaced-repetition-flashcards-in-logseq-using-notepad-and-excel/jxPxEdkM4BBhLfrz9PfjBr). This uses the [zettelkasten](https://zettelkasten.de/overview/) method to create a [knowledge graph](https://en.wikipedia.org/wiki/Knowledge_graph), which is perfect for studying.
+
 # Styleguide
 
 See [.github/pull_request_template.md](.github/pull_request_template.md) for the styleguide.
