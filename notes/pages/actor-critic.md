@@ -1,8 +1,8 @@
 ---
 alias: actor critic, a2c, a3c
 ---
-- What is the value function used for in [[actor critic]] methods? #card
-    - The value function is used to estimate the *average* expected return from a given state.
+- What is the [[value function]] used for in [[actor critic]] methods? #card
+    - The [[value function]] is used to estimate the *average* expected return from a given state.
     - It could theoretically be a Q-function, but in practice, it is often a state-value function using [[TD]] error.
 - What is the [[advantage]] function used for in [[actor critic]] methods? #card
     - The difference between the expected reward from a state-action pair (Q) and the average expected reward from just the state (V).
