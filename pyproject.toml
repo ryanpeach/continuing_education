@@ -60,6 +60,7 @@ dev-dependencies = [
     "ipywidgets>=8.1.5",
     "jupytext>=1.16.7",
     "notebook>=7.3.2",
+    "ruff>=0.11.12",
 ]
 
 [tool.uv.sources]
