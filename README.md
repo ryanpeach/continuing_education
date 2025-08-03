@@ -26,7 +26,7 @@ If you then wrap cells (the code you run) in `if __name__ == "__main__"` you als
 
 ## Logseq
 
-I use [logseq](https://logseq.com/) to manage my [./notes](./notes) and [flashcards](https://hub.logseq.com/use-cases/1Sr4awszMQzD4GM5KvWim7/how-to-quickly-create-spaced-repetition-flashcards-in-logseq-using-notepad-and-excel/jxPxEdkM4BBhLfrz9PfjBr). This uses the [zettelkasten](https://zettelkasten.de/overview/) method to create a [knowledge graph](https://en.wikipedia.org/wiki/Knowledge_graph), which is perfect for studying.
+I use [marksman](https://github.com/artempyanykh/marksman) to manage my markdown notes and link them to each other. I then use [mdanki](https://github.com/ashlinchak/mdanki) to convert them to flashcards.
 
 # Styleguide
 
@@ -52,7 +52,7 @@ See [.github/pull_request_template.md](.github/pull_request_template.md) for the
 * Reinforcement Learning
     * Value Based Methods - I'm pretty much up to date with these methods, but might as well implement them. I may go into less explanation though.
         * 📖📓💻 [$TD(\lambda)$](https://web.stanford.edu/class/cs234/notes/cs234-notes7.pdf)
-        * 📖📓💻❗ [Deep Q Learning](https://arxiv.org/abs/1312.5602) 
+        * 📖📓💻❗ [Deep Q Learning](https://arxiv.org/abs/1312.5602)
           * <https://lightning.ai/docs/pytorch/LTS/notebooks/lightning_examples/reinforce-learning-DQN.html>
         * 📖❗[Prioritized Experience Replay](https://arxiv.org/abs/1511.05952)
         * 📖❗[Double Q Learning](https://arxiv.org/abs/1509.06461)
@@ -85,21 +85,21 @@ See [.github/pull_request_template.md](.github/pull_request_template.md) for the
          * [ ] [Go-Explore](https://www.nature.com/articles/s41586-020-03157-9)
          * [ ] [NoisyNet](https://openreview.net/pdf?id=rywHCPkAW)
          * [ ] [DQN-PixelCNN](https://arxiv.org/abs/1606.01868)
-         * [ ] [#Exploration](http://papers.neurips.cc/paper/6868-exploration-a-study-of-count-based-exploration-for-deep-reinforcement-learning.pdf) 
-         * [ ] [EX2](https://papers.nips.cc/paper/2017/file/1baff70e2669e8376347efd3a874a341-Paper.pdf) 
-         * [ ] [ICM](https://arxiv.org/abs/1705.05363) 
-         * [ ] [RND](https://arxiv.org/abs/1810.12894) 
-         * [ ] [NGU](https://arxiv.org/abs/2002.06038) 
-         * [ ] [Agent57](https://arxiv.org/abs/2003.13350) 
-         * [ ] [VIME](https://arxiv.org/abs/1605.09674) 
-         * [ ] [EMI](https://openreview.net/forum?id=H1exf64KwH) 
-         * [ ] [DIYAN](https://arxiv.org/abs/1802.06070) 
-         * [ ] [SAC](https://arxiv.org/abs/1801.01290) 
-         * [ ] [BootstrappedDQN](https://arxiv.org/abs/1602.04621) 
-         * [ ] [PSRL](https://arxiv.org/pdf/1306.0940.pdf) 
-         * [ ] [HER](https://arxiv.org/pdf/1707.01495.pdf) 
-         * [ ] [DQfD](https://arxiv.org/abs/1704.03732) 
-         * [ ] [R2D3](https://arxiv.org/abs/1909.01387) 
+         * [ ] [#Exploration](http://papers.neurips.cc/paper/6868-exploration-a-study-of-count-based-exploration-for-deep-reinforcement-learning.pdf)
+         * [ ] [EX2](https://papers.nips.cc/paper/2017/file/1baff70e2669e8376347efd3a874a341-Paper.pdf)
+         * [ ] [ICM](https://arxiv.org/abs/1705.05363)
+         * [ ] [RND](https://arxiv.org/abs/1810.12894)
+         * [ ] [NGU](https://arxiv.org/abs/2002.06038)
+         * [ ] [Agent57](https://arxiv.org/abs/2003.13350)
+         * [ ] [VIME](https://arxiv.org/abs/1605.09674)
+         * [ ] [EMI](https://openreview.net/forum?id=H1exf64KwH)
+         * [ ] [DIYAN](https://arxiv.org/abs/1802.06070)
+         * [ ] [SAC](https://arxiv.org/abs/1801.01290)
+         * [ ] [BootstrappedDQN](https://arxiv.org/abs/1602.04621)
+         * [ ] [PSRL](https://arxiv.org/pdf/1306.0940.pdf)
+         * [ ] [HER](https://arxiv.org/pdf/1707.01495.pdf)
+         * [ ] [DQfD](https://arxiv.org/abs/1704.03732)
+         * [ ] [R2D3](https://arxiv.org/abs/1909.01387)
     * Multi Agent RL
         * [ ] [Emergent Communication through Negotiation](https://arxiv.org/abs/1804.03980)
         * [ ] Warp Drive
@@ -114,11 +114,11 @@ See [.github/pull_request_template.md](.github/pull_request_template.md) for the
 * Transformers
     * [ ] [Tokenization](https://huggingface.co/learn/nlp-course/en/chapter6/1?fw=pt)
     * [ ] [Word Embeddings](https://pytorch.org/tutorials/beginner/nlp/word_embeddings_tutorial.html)
-    * 📖❗[Transformers](https://arxiv.org/abs/1706.03762) 
+    * 📖❗[Transformers](https://arxiv.org/abs/1706.03762)
       * <https://pytorch.org/tutorials/beginner/transformer_tutorial.html>
       * <https://lightning.ai/docs/pytorch/stable/notebooks/course_UvA-DL/05-transformers-and-MH-attention.html>
-    * 📖❗[BERT](https://arxiv.org/abs/1810.04805) 
-    * [ ]❗[Sentence-BERT](https://arxiv.org/pdf/1908.10084) 
+    * 📖❗[BERT](https://arxiv.org/abs/1810.04805)
+    * [ ]❗[Sentence-BERT](https://arxiv.org/pdf/1908.10084)
     * [ ] [Fine Tuning](https://huggingface.co/learn/nlp-course/en/chapter3/1?fw=pt)
     * [ ] [RLHF](https://huggingface.co/blog/the_n_implementation_details_of_rlhf_with_ppo)
     * [ ] [Direct Preference Optimization](https://arxiv.org/pdf/2305.18290)
@@ -141,7 +141,7 @@ See [.github/pull_request_template.md](.github/pull_request_template.md) for the
     * [Survey on Graph RAG](https://arxiv.org/abs/2408.08921)
 * [ ] Diffusion Models
   * <https://lightning.ai/lightning-community-labs/studios/build-diffusion-models-with-pytorch-lightning-hf-diffusers>
-* [ ]❗Graph Neural Networks (GNN) 
+* [ ]❗Graph Neural Networks (GNN)
   * <https://lightning.ai/docs/pytorch/stable/notebooks/course_UvA-DL/06-graph-neural-networks.html>
 * Cognitive Science
    * [ ] [Hopfield Network](https://www.youtube.com/watch?v=1WPJdAW-sFo)

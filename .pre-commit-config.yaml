@@ -40,9 +40,9 @@ repos:
   rev: v1.6.1
   hooks:
     - id: enforce-ascii
-      files: notes/pages/.*\.md
+      files: continuing_education/.*\.md
     - id: mdlinker
-      files: notes/pages/.*\.md
+      files: continuing_education/.*\.md
       args:
       - "--fix"
       - "--allow-dirty"
