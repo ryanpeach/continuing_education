@@ -1,3 +1,4 @@
-pages_directory = "notes/pages"
-
-other_directories = ["notes/journal"]
+new_files_directory = "notes"
+files = [
+    "continuing_education/**/*.md",
+]
