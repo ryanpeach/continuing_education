@@ -4,6 +4,8 @@ Here are some tasks to complete before merging this PR:
 
 # Styleguide
 
+- [ ] Did you update the version in Cargo.toml?
+
 ## Jupyter
 
 - [ ] Add references to the bottom of the notebook.
@@ -34,3 +36,4 @@ if __name__ == '__main__':
 - [ ] Use singular nouns for filenames.
 - [ ] Use `-` in filenames instead of spaces.
 - [ ] For any new notes, you need to go back in other notes and link to them using project search.
+- [ ] Put sources on each flashcard. Mark AI as the source if you used AI to generate the flashcard. These can be revisited later. Mark yourself as the source if you wrote the flashcard yourself.
