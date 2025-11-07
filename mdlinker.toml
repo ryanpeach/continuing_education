@@ -1,4 +1,5 @@
 new_files_directory = "notes"
 files = [
     "continuing_education/**/*.md",
+    "notes/**/*.md",
 ]
