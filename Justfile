@@ -5,3 +5,6 @@ add path:
 # Sync all notebooks
 sync:
   uv run jupytext --sync **/*.ipynb
+
+anki:
+  mdanki continuing_education anki.apkg
