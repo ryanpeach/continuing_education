@@ -36,13 +36,13 @@ repos:
     hooks:
       - id: jupytext
         args: [--sync]
-  - repo: https://github.com/ryanpeach/mdlinker
-    rev: v1.7.2
-    hooks:
-      - id: enforce-ascii
-        files: continuing_education/.*\.md
-      - id: mdlinker
-        files: continuing_education/.*\.md
-        args:
-          - "--fix"
-          - "--allow-dirty"
+  # - repo: https://github.com/ryanpeach/mdlinker
+  #   rev: v1.7.2
+  #   hooks:
+  #     - id: enforce-ascii
+  #       files: continuing_education/.*\.md
+  #     - id: mdlinker
+  #       files: continuing_education/.*\.md
+  #       args:
+  #         - "--fix"
+  #         - "--allow-dirty"

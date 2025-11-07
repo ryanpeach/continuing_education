@@ -1,4 +1,4 @@
-# Gradient
+# [[Gradient]]
 
 ## What is the [[gradient]]?
 

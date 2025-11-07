@@ -1,4 +1,4 @@
-# Henessian
+# [[Henessian]]
 
 ## What is a [[Henessian]]?
 

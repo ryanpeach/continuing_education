@@ -1,6 +1,6 @@
-## Laplacian
+## [[Laplacian]]
 
-## What is the Laplacian
+## What is the [[Laplacian]]
 
 The second order [[gradient]]. Produces a scalar.
 

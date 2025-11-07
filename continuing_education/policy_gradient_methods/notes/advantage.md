@@ -5,5 +5,5 @@
 ## What is the intuition behind the [[advantage]] function?
     - The [[advantage]] function is a measure of how much better an action is compared to the average action in a given state.
     - Learning relative [[advantage]] is easier and has less variance than learning absolute values. [[Advantage]] is more relevant to decision making via argmax than absolute values.
-## Define the [[advantage]] function in terms of the Q-value function and the value function.
+## Define the [[advantage]] function in terms of the Q-value function and the [[value]] function.
   - $A(s,a) = Q(s,a) - V(s)$
