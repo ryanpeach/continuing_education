@@ -51,3 +51,5 @@ https://ryanpeach.com/Publish/Machine+Learning/Research+Papers
 * [Lightning Tutorials](https://lightning.ai/docs/pytorch/stable/notebooks.html)
 * [Hugging Face RL](https://huggingface.co/learn/deep-rl-course/unit0/introduction)
 * [Pytorch](https://pytorch.org/tutorials)
+* [How To Become A Mechanistic Interpretability Researcher](https://www.alignmentforum.org/posts/jP9KDyMkchuv6tHwm/how-to-become-a-mechanistic-interpretability-researcher)
+* [DSPy](https://dspy.ai/learn/)
