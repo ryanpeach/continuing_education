@@ -24,7 +24,7 @@ So I am using [jupytext](https://github.com/mwouts/jupytext) to make syncronized
 
 If you then wrap cells (the code you run) in `if __name__ == "__main__"` you also now gain the ability to use these notebooks as importable libraries in future work.
 
-## Logseq
+## Notes
 
 I use [marksman](https://github.com/artempyanykh/marksman) to manage my markdown notes and link them to each other. I then use [mdanki](https://github.com/ashlinchak/mdanki) to convert them to flashcards.
 
