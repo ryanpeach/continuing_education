@@ -46,6 +46,7 @@ https://ryanpeach.com/Publish/Machine+Learning/Research+Papers
 
 ## Sources for further work
 
+* [Alignment focused Deep Learning Curriculum](https://github.com/jacobhilton/deep_learning_curriculum)
 * [Key Papers in Deep RL](https://spinningup.openai.com/en/latest/spinningup/keypapers.html)
 * [Spinning Up](https://spinningup.openai.com/en/latest/index.html)
 * [Lightning Tutorials](https://lightning.ai/docs/pytorch/stable/notebooks.html)
