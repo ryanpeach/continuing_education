@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(*)"
+    ],
+    "deny": [
+      "Write(*)",
+      "Bash(git commit *)"
+    ]
+  }
+}
